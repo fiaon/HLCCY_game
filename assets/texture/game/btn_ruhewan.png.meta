@@ -1,0 +1,31 @@
+{
+  "ver": "2.2.0",
+  "uuid": "c8935f72-28de-4494-8abf-40073e284d9a",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "subMetas": {
+    "btn_ruhewan": {
+      "ver": "1.0.3",
+      "uuid": "71e860f5-5834-4bb1-aaa5-f690cbb92bb9",
+      "rawTextureUuid": "c8935f72-28de-4494-8abf-40073e284d9a",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 100,
+      "height": 95,
+      "rawWidth": 100,
+      "rawHeight": 95,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
