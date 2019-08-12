@@ -1,8 +1,9 @@
 window.Global = {
 
-    power:1,             //体力点数
+    power:1,                //体力点数
     maxpower:5,             //最大体力值
     prefab_tip: null,       //提示
+    word:[],                //每关棋盘上存在的字(用来判断是否正确)
 
     Time_Last: 0,                    //切后台时间
     Time_After: 0,                   //切回前台时间
@@ -29,9 +30,38 @@ window.Global = {
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
     url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
-    url_GetMission: "game/GetMission",  
+    url_GetMission: "game/GetMission",
+    url_GetUserData: "game/GetUserData",                    //获取数据
+    url_SetUserData: "game/SetUserData",                    //存储数据
+    /**
+     * 读取用户数据
+     */
+    GetUserData(){
+        let parme = {
+            appid: this.appid,
+            sessionId: this.sessionId,
+        };
+        this.Post(this.url_GetUserData, parme, (res) => {
 
-
+        });
+    },
+    /**
+     * 存储用户数据
+     */
+    SetUserData() {
+        let parme = {
+            appid: this.appid,
+            sessionId: this.sessionId,
+            udata: 0,               
+            score:0,
+            lvl: 0,
+            ucount: 0,
+            zcount: 0,
+        };
+        this.Post(this.url_SetUserData, parme, () => {
+            this.GetUserData();
+        });
+    },
     /**
      * 获取任务列表
      */
