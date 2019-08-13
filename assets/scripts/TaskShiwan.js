@@ -178,9 +178,9 @@ cc.Class({
         //提示
         Global.ShowTip(this.node, "领取成功");
         //领取成功之后重新请求任务接口，然后刷新列表
-        Global.GetMission((data) => {
-            // 上线前注释console.log("data == ", data);
-            self.ShiWanTaskData = data.result.pgmission;     //试玩任务数据
+        Global.GetMission((res) => {
+            
+            self.ShiWanTaskData = res.result.pgmission;     //试玩任务数据
             //清空列表
             if (self.content.children.length > 0) {
                 self.content.removeAllChildren();

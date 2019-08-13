@@ -59,7 +59,7 @@ cc.Class({
     },
     start () {
         this.BtnTishiFangSuo();
-        this.dataArr=null;       //消失的字数组的下标也是光标的位置
+        this.dataArr=null;      //成语数据
         this.oldArr = [];       //用来打乱的数组
         this.haveziArr=[];      //是否存在字(用来显示光标的位置)
         this.index =0;
@@ -67,11 +67,26 @@ cc.Class({
         console.log(data);
         if(data){
             this.dataArr = data.data.conf;
+            Global.map = new Array();
+            //循环需要的成语初始化成语和每个字的状态
+            for(let i=0;i<this.dataArr.idiom.length;i++){
+                Global.map[i] = new Array();
+                let numindex = 0;
+                for(let j=0;j<this.dataArr.word.length;j++){
+                    //如果字属于这个成语
+                    if(this.dataArr.idiom[i].indexOf(this.dataArr.word[j])!=-1){
+                        // index 成语的下标 isOn是否有字 word:正确的字 curword：当前的字
+                        Global.map[i][numindex] = {index:j,isOn:1,word:this.dataArr.word[j],curword:this.dataArr.word[j],answer:1};
+                        numindex++;
+                    }
+                }
+            }
             for(let i=0;i<data.data.conf.word.length;i++){
                 let word = cc.instantiate(this.wordPrefab);
                 word.getComponent("WordPrefab").init(i,data.data.conf.answer,data.data.conf.word[i],data.data.conf.posx[i],data.data.conf.posy[i]);
                 this.qipan.addChild(word);
             }
+            console.log("map: ",Global.map);
             this.select = cc.instantiate(this.selectbtn);
             this.selectId = data.data.conf.answer[this.index];
             this.select.x = data.data.conf.posx[data.data.conf.answer[this.index]]*68;
@@ -91,28 +106,64 @@ cc.Class({
         }
         //点击下面字的监听
         cc.game.on("clickWord",function(id,word){
+            Global.ChangeIdiomStateChange1(this.oldArr[this.index],word);
+            console.log("map: ",Global.map);
             this.qipan.getChildByName(this.oldArr[this.index].toString()).getComponent("WordPrefab").showWord(id,word);
-            //如果是正确的
-            Global.word.push(word);
-            //一个成语填满了才需要判断是否正确
-            if(this.dataArr.word[this.oldArr[this.index]] == word){
-                for(let i=0;i<this.dataArr.idiom.length;i++){
-                    if(this.dataArr.idiom[i].indexOf(word.toString())!=-1){
-                        // console.log("word:",word,this.dataArr.idiom[i]);
-                        let num=0;
-                        for(let k=0;k<this.dataArr.idiom[i].length;k++){
-                            for(let j=0;j<Global.word.length;j++){
-                                if(Global.word[j] == this.dataArr.idiom[i][k]){
-                                    num++;
-                                }
+            //修改每个字的状态。
+            for(let n=0;n<Global.map.length;n++){
+                let isOnnum = 0;
+                for(let m=0;m<Global.map[n].length;m++){
+                    if(Global.map[n][m].index == this.oldArr[this.index]){
+                        for(let nm=0;nm<4;nm++){
+                            if(Global.map[n][nm].isOn == 1){
+                                isOnnum ++;
                             }
                         }
-                        if(num ==4){
-                            console.log("正确",this.dataArr.idiom[i]);
+                        //成语给填满了。开始判断对错
+                        if(isOnnum ==4){
+                            let knum=0;
+                            for(let k=0;k<Global.map[n].length;k++){
+                                if(Global.map[n][k].word == Global.map[n][k].curword){
+                                    knum++;
+                                }
+                            }
+                            if(knum==4){
+                                console.log("正确",Global.map[n]);
+                                for(let kk=0;kk<4;kk++){
+                                    cc.game.emit("idiomRight",Global.map[n][kk].index);
+                                }
+                            }else{
+                                console.log("错误",Global.map[n]);
+                                for(let kk=0;kk<4;kk++){
+                                    if(Global.map[n][kk].answer ==0){
+                                        cc.game.emit("idiomError",Global.map[n][kk].index);
+                                    }
+                                }
+                                break;
+                            }
                         }
                     }
                 }
             }
+            // //一个成语填满了才需要判断是否正确
+            // if(this.dataArr.word[this.oldArr[this.index]] == word){
+            //     for(let i=0;i<this.dataArr.idiom.length;i++){
+            //         if(this.dataArr.idiom[i].indexOf(word.toString())!=-1){
+            //             // console.log("word:",word,this.dataArr.idiom[i]);
+            //             let num=0;
+            //             for(let k=0;k<this.dataArr.idiom[i].length;k++){
+            //                 for(let j=0;j<Global.word.length;j++){
+            //                     if(Global.word[j] == this.dataArr.idiom[i][k]){
+            //                         num++;
+            //                     }
+            //                 }
+            //             }
+            //             if(num ==4){
+            //                 console.log("正确",this.dataArr.idiom[i]);
+            //             }
+            //         }
+            //     }
+            // }
             this.haveziArr[this.index]=1;
             for(let i=0;i<this.haveziArr.length;i++){
                 if(this.haveziArr[i]==0){
@@ -132,11 +183,6 @@ cc.Class({
         cc.game.on("showWord",function(word,index,id){
             this.index = index;
             this.haveziArr[index]=0;
-            Global.word.forEach(function(item, index, arr) {
-                if(item == word) {
-                    arr.splice(index, 1);
-                }
-            });
             for(let i=0;i<this.clickcontent.children.length;i++){
                 if(this.clickcontent.children[i].name == id){
                     this.clickcontent.children[i].active = true;

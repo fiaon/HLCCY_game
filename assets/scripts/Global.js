@@ -3,7 +3,7 @@ window.Global = {
     power:1,                //体力点数
     maxpower:5,             //最大体力值
     prefab_tip: null,       //提示
-    word:[],                //每关棋盘上存在的字(用来判断是否正确)
+    map:null,               //存储所有成语和他每个字的状态
 
     Time_Last: 0,                    //切后台时间
     Time_After: 0,                   //切回前台时间
@@ -17,8 +17,8 @@ window.Global = {
 
     jumpinfo_callback: null,
 
-    appid: "",
-    appSecret: "",
+    appid: "wx4fb5b2de70ef1649",
+    appSecret: "fe18f16ab7a39971e69767dce7897e7e",
     linkUrl: "https://wx.zaohegame.com/",        //域名
     //linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
     sessionId: null,                                 //sessionid
@@ -30,9 +30,37 @@ window.Global = {
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
     url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
-    url_GetMission: "game/GetMission",
+    url_GetMission: "HLCY/GetUserMission",                  //任务数据
     url_GetUserData: "game/GetUserData",                    //获取数据
     url_SetUserData: "game/SetUserData",                    //存储数据
+    url_GetUserLvlData:"HLCY/GetUserLvlData",               //等级信息
+    url_GetCarData:"HLCY/GetCarData",                       //车辆信息
+
+    //num:下标 没有字的时候状态是0
+    ChangeIdiomStateGui0(num){
+        //修改每个字的状态。
+        for(let n=0;n<Global.map.length;n++){
+            for(let m=0;m<Global.map[n].length;m++){
+             if(Global.map[n][m].index == num){
+                 Global.map[n][m].isOn = 0;
+                 Global.map[n][m].curword = "";
+                 Global.map[n][m].answer = 0;
+             }
+            }
+        }
+    },
+    //添加字的时候状态变成1
+    ChangeIdiomStateChange1(num,word){
+        //修改每个字的状态。
+        for(let n=0;n<Global.map.length;n++){
+            for(let m=0;m<Global.map[n].length;m++){
+             if(Global.map[n][m].index == num){
+                 Global.map[n][m].isOn = 1;
+                 Global.map[n][m].curword = word;
+             }
+            }
+        }
+    },
     /**
      * 读取用户数据
      */
