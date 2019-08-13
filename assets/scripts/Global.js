@@ -36,31 +36,6 @@ window.Global = {
     url_GetUserLvlData:"HLCY/GetUserLvlData",               //等级信息
     url_GetCarData:"HLCY/GetCarData",                       //车辆信息
 
-    //num:下标 没有字的时候状态是0
-    ChangeIdiomStateGui0(num){
-        //修改每个字的状态。
-        for(let n=0;n<Global.map.length;n++){
-            for(let m=0;m<Global.map[n].length;m++){
-             if(Global.map[n][m].index == num){
-                 Global.map[n][m].isOn = 0;
-                 Global.map[n][m].curword = "";
-                 Global.map[n][m].answer = 0;
-             }
-            }
-        }
-    },
-    //添加字的时候状态变成1
-    ChangeIdiomStateChange1(num,word){
-        //修改每个字的状态。
-        for(let n=0;n<Global.map.length;n++){
-            for(let m=0;m<Global.map[n].length;m++){
-             if(Global.map[n][m].index == num){
-                 Global.map[n][m].isOn = 1;
-                 Global.map[n][m].curword = word;
-             }
-            }
-        }
-    },
     /**
      * 读取用户数据
      */

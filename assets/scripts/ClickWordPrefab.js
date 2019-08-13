@@ -22,15 +22,21 @@ cc.Class({
     start () {
         //this.selectbtn = cc.find("Canvas/qipanbg/9*9/select_img");
     },
-    init(id,word){
+
+    init(id,word, posx, posy){
         this.selectID = id;
         this.selectword = word;
         this.node.name = id.toString();
         this.word.string = word;
+        // 无效
+        this.word_index = posx * 10 + posy;
     },
+
     clickBtn(){
         this.node.active = false;
         cc.game.emit("clickWord",this.selectID,this.selectword);
     },
+
+  
     // update (dt) {},
 });
