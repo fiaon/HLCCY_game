@@ -50,6 +50,40 @@ cc.Class({
 
     start () {
         Global.prefab_tip = this.prefab_tips;
+        if (CC_WECHATGAME) {
+            Global.GetJumpInfo();
+            Global.GetMission();
+            var self = this;
+            wx.login({
+                success(res) {
+                    // 上线前注释console.log("登录成功 == ", res);
+                    self.code = res.code;
+                    let parme = {};
+                    if(Global.app_data){
+                        console.log("app_data存在")
+                        parme = {
+                            appid: Global.appid,
+                            code: self.code,
+                            introuid: Global.Introuid,
+                            appdata:Global.app_data,
+                        };
+                    }else{
+                        console.log("app_data不存在")
+                        parme = {
+                            appid: Global.appid,
+                            code: self.code,
+                            introuid: Global.Introuid,
+                            appdata:"",
+                        };
+                    }
+                    // Global.Post(url, parme);
+                    console.log("登陆参数",parme);
+                    Global.UserLogin(parme);
+                }
+            });
+
+            Global.GetUserLvlData();
+        }
 
         //Global.addListener();
         this.ShowBoxView();
@@ -81,12 +115,18 @@ cc.Class({
             this.node.addChild(carview);
         }
     },
-    //升级车辆
+    //升级人物
     UserLevelUpBtn(){
         //看视频成功显示页面TODO
         let user= cc.instantiate(this.prefab_userview);
         if(user){
             this.node.addChild(user);
+        }
+    },
+    ShowPeopleUpView(){
+        let peopleview = cc.instantiate(this.prefab_peopleupview)
+        if(peopleview){
+            this.node.addChild(peopleview);
         }
     },
     //宝箱

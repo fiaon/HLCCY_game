@@ -46,14 +46,14 @@ cc.Class({
         this.outpos = cc.v2(this.node.x+this.node.width, this.node.y);
         this.hide = true;
         // // 上线前注释console.log("start1");
-        // if (Global.jumpinfo_callback == null) {
-        //     // 上线前注释console.log("set callback");
-        //     // 上线前注释console.log("11111111111-----");
-        //     Global.jumpinfo_callback = this.JumpCallBack.bind(this);
-        // }
-        // else {
-        //     this.JumpCallBack();
-        // }
+        if (Global.jumpinfo_callback == null) {
+            // 上线前注释console.log("set callback");
+            // 上线前注释console.log("11111111111-----");
+            Global.jumpinfo_callback = this.JumpCallBack.bind(this);
+        }
+        else {
+            this.JumpCallBack();
+        }
         this.btn_sprite = this.btn.getComponent(cc.Sprite);
         this.giftAnim();
         this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;

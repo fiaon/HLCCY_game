@@ -1,9 +1,15 @@
 window.Global = {
-
+    name:null,
+    avatarUrl:null,
+    sex:null,
     power:1,                //体力点数
     maxpower:5,             //最大体力值
     prefab_tip: null,       //提示
-    map:null,               //存储所有成语和他每个字的状态
+    level:1,                //玩家解锁等级
+    gamelevel:1,            //游戏关卡等级
+    UserLvlData:null,       //玩家升级职业的数据
+    CarLvlData:null,        //车辆信息
+
 
     Time_Last: 0,                    //切后台时间
     Time_After: 0,                   //切回前台时间
@@ -19,14 +25,13 @@ window.Global = {
 
     appid: "wx4fb5b2de70ef1649",
     appSecret: "fe18f16ab7a39971e69767dce7897e7e",
-    linkUrl: "https://wx.zaohegame.com/",        //域名
-    //linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
+    //linkUrl: "https://wx.zaohegame.com/",        //域名
+    linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
     sessionId: null,                                 //sessionid
     app_data:null,                      //第三方进游戏存储数据
     Introuid: 0,                    //用来辨别邀请任务的id
+    Udata:null,
 
-    url_UserLogin: "game/UserLogin",                         //接口地址
-    url_UserAuth: "game/UserAuth",                         //接口地址
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
     url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
@@ -57,7 +62,7 @@ window.Global = {
             sessionId: this.sessionId,
             udata: 0,               
             score:0,
-            lvl: 0,
+            lvl: this.level,
             ucount: 0,
             zcount: 0,
         };
@@ -134,6 +139,7 @@ window.Global = {
         // 上线前注释console.log("parme =登录= ", parme);
         this.Post(this.url_UserLoginV2, parme, (res) => {
             self.sessionId = res.result.sessionid;
+            Global.ShouQuan();
         });
     },
      /**
@@ -179,17 +185,93 @@ window.Global = {
             }
         });
     },
+    ShouQuan(){
+        if (CC_WECHATGAME) {
+            let exportJson = {};
+            let sysInfo = wx.getSystemInfoSync();
+            //获取微信界面大小
+            let width = sysInfo.screenWidth;
+            let height = sysInfo.screenHeight;
+            window.wx.getSetting({
+                success (res) {
+                    console.log(res.authSetting);
+                    if (res.authSetting["scope.userInfo"]) {
+                        console.log("用户已授权");
+                        window.wx.getUserInfo({
+                            success(res){
+                                console.log(res);
+                                Global.UserAuthPost(res, Global.sessionId, () => {});
+                                exportJson.userInfo = res.userInfo;
+                                //此时可进行登录操作
+                                Global.name = res.userInfo.nickName; //用户昵称
+                                Global. avatarUrl = res.userInfo.avatarUrl; //用户头像图片 url
+                                Global.sex = res.userInfo.gender;   //用户性别
+                            }
+                        });
+                    }else {
+                        console.log("用户未授权");
+                        let button = window.wx.createUserInfoButton({
+                            type: 'text',
+                            text: '',
+                            style: {
+                                left: 0,
+                                top: 0,
+                                width: width,
+                                height: height,
+                                backgroundColor: '#00000000',//最后两位为透明度
+                                color: '#ffffff',
+                                fontSize: 20,
+                                textAlign: "center",
+                                lineHeight: height,
+                            }
+                        });
+                        button.onTap((res) => {
+                            if (res.userInfo) {
+                                console.log("用户授权:", res);
+                                Global.UserAuthPost(res, Global.sessionId, () => {});
+                                exportJson.userInfo = res.userInfo;
+                                //此时可进行登录操作
+                                Global.name = res.userInfo.nickName; //用户昵称
+                                Global.avatarUrl = res.userInfo.avatarUrl; //用户头像图片 url
+                                Global.sex = res.userInfo.gender;   //用户性别
+                                button.destroy();
+                            }else {
+                                console.log("用户拒绝授权:", res);
+                            }
+                        });
+                    }
+                }
+            })
+        }
+    },
+    /**
+     * 获取等级信息(玩家升级人物等级)并存储
+     */
+    GetUserLvlData(){
+        this.Post(this.url_GetUserLvlData,null,(res)=>{
+            if(res.state ==1){
+                this.UserLvlData = res.result;
+            }
+        });
+    },
+    //获取车辆信息
+    GetCarData(){
+        this.Post(this.url_GetCarData,null,(res)=>{
+            if(res.state ==1){
+                this.CarLvlData = res.result;
+            }
+        });
+    },
     Getinfo() {
         var self = this;
         this.Get("https://wx.zaohegame.com/game/shareimg?appid=wxfa819a83fa221978", (obj) => {
             if (obj.state == 1) {
                 this.shareimg = obj.result;
-                // 上线前注释console.log(self.shareimg)
             }
         });
     },
 
-    GetJumpInfo(callback) {
+    GetJumpInfo(callback) { 
         this.Get("https://wx.zaohegame.com/game/jumpapp?appid=wxfa819a83fa221978", (obj) => {
             if (obj.state == 1) {
                 this.jumpappObject = obj.result;

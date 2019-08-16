@@ -27,10 +27,14 @@
       }
     ],
     "_active": true,
-    "_level": 2,
-    "_components": [],
+    "_level": 1,
+    "_components": [
+      {
+        "__id__": 11
+      }
+    ],
     "_prefab": {
-      "__id__": 11
+      "__id__": 12
     },
     "_opacity": 255,
     "_color": {
@@ -172,7 +176,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "c148a017-3bc7-4b09-b4ad-2c00cb33d785"
     },
     "fileId": "7dKt2R/aZIqY33XGaJ2Dd6",
     "sync": false
@@ -273,7 +277,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "c148a017-3bc7-4b09-b4ad-2c00cb33d785"
     },
     "fileId": "d0phtW5E1FRK5l1NkaITF9",
     "sync": false
@@ -373,10 +377,26 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "c148a017-3bc7-4b09-b4ad-2c00cb33d785"
     },
     "fileId": "7eZhTnk2xDlJtTXAwfAMNi",
     "sync": false
+  },
+  {
+    "__type__": "09ce8e5fKBKtZYPSVzKCCBe",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "sprite": {
+      "__id__": 3
+    },
+    "labelGame": {
+      "__id__": 9
+    },
+    "_id": ""
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -384,7 +404,7 @@
       "__id__": 1
     },
     "asset": {
-      "__id__": 0
+      "__uuid__": "c148a017-3bc7-4b09-b4ad-2c00cb33d785"
     },
     "fileId": "5cWVp04AxAs6R7jbNuHdsz",
     "sync": false

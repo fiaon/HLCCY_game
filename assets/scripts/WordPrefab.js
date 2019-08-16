@@ -15,6 +15,7 @@ cc.Class({
         word:cc.Label,
         img:cc.Node,
         ziimg:cc.Node,
+        errorimg:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -23,12 +24,30 @@ cc.Class({
 
     start () {
         this.word_index = 0;
+        cc.game.on("idiomRight",function(indexnum){
+            if(indexnum == this.indexnum){
+                this.ziimg.active = true;
+                this.errorimg.active = false;
+                this.word.node.color = new cc.color(255,255,255);
+            }
+        },this);
+        cc.game.on("idiomError",function(indexnum){
+            if(indexnum == this.indexnum){
+                // this.ziimg.active = false;
+                // this.errorimg.active = true;
+                // this.word.node.color = new cc.color(255,0,0);
+                // this.word.string = "";
+                this.clickBtn();
+            }
+        },this);
     },
     //初始化数据
     //
     init(k,answer,word,x,y){
+        this.oldword = word;
         this.selectword = word;
         this.node.name = k.toString();
+        this.indexnum = k;
         for(let i=0;i<answer.length;i++){
             if(k ==answer[i]){
                 this.word.string ="";
@@ -66,6 +85,7 @@ cc.Class({
         
         this.selectID = id;
         this.word.string = word;
+        this.word.node.color = new cc.color(255,255,255);
         this.selectword = word;
         this.ziimg.active = true;
         return true;
@@ -77,9 +97,12 @@ cc.Class({
         if(this.word.string!=""){
             this.word.string = "";
             this.ziimg.active = false;
+            this.errorimg.active = false;
+        }else{
+            this.selectID = -1;
         }
         //selectword 用来删除棋盘上的字 index光标的下标 id:用来显示下面的字
-        cc.game.emit("showWord",this.selectword,this.index,this.selectID,this.word_index);
+        cc.game.emit("showWord",this.index,this.selectID,this.word_index);
     },
     // update (dt) {},
 });
