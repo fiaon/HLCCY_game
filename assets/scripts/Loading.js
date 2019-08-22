@@ -55,11 +55,11 @@ cc.Class({
             var self = this;
             wx.login({
                 success(res) {
-                    // 上线前注释console.log("登录成功 == ", res);
+                    // 上线前注释
+                    console.log("login == ", res);
                     self.code = res.code;
                     let parme = {};
                     if(Global.app_data){
-                        console.log("app_data存在")
                         parme = {
                             appid: Global.appid,
                             code: self.code,
@@ -67,7 +67,6 @@ cc.Class({
                             appdata:Global.app_data,
                         };
                     }else{
-                        console.log("app_data不存在")
                         parme = {
                             appid: Global.appid,
                             code: self.code,
@@ -77,8 +76,10 @@ cc.Class({
                     }
                     // Global.Post(url, parme);
                     console.log("登陆参数",parme);
-                    Global.UserLogin(parme);
-                    self.loadRemoteAssets();
+                    Global.UserLogin(parme,self.loadRemoteAssets());
+                    Global.GetJumpInfo();
+                    Global.GetUserLvlData();
+                    Global.GetCarData();
                 }
             });
         }
@@ -94,7 +95,7 @@ cc.Class({
     const fs = wx.getFileSystemManager()  // 获取微信小游戏sdk中的 文件系统
     // 然后
     const downloadTask = wx.downloadFile({
-        url: 'https://img.zaohegame.com/staticfile/wxfa819a83fa221978/res/raw-assets.zip',  // 我们上传到服务器的资源文件压缩包地址
+        url: 'https://img.zaohegame.com/staticfile/wx039e71b55cba9869/req.zip',  // 我们上传到服务器的资源文件压缩包地址
         header: {
             'content-type': 'application/json'
         },

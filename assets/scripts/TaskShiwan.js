@@ -35,11 +35,11 @@ cc.Class({
     start () {
         let self = this;
         this.ShiWanTaskData = null;
-        // Global.GetMission((data) => {
-        //     // 上线前注释console.log("data == ", data);
-        //     self.ShiWanTaskData = data.result.pgmission;     //试玩任务数据
-        //     self.onAddShiWanItemForScrollview
-        // });
+        Global.GetMission((res) => {
+            // 上线前注释console.log("res == ", res);
+            self.ShiWanTaskData = res.result.pgmission;     //试玩任务数据
+            self.onAddShiWanItemForScrollview
+        });
     },
     /**
      * 添加试玩Item的方法

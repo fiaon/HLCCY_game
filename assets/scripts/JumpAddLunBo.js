@@ -25,13 +25,7 @@ cc.Class({
         this.gundong = false;
         this.speed = 100;
         //cc.director.getScene().name == "start"&&
-        if(Global.jumpappObject == null){
-            this.scheduleOnce(function(){
-                this.JumpCallBack();
-            },2);
-        }else{
-            this.JumpCallBack();
-        }
+        this.JumpCallBack();
         
         // this.schedule(function(){
         //     if(this.jumplunbo_content.children.length > 0){
@@ -45,8 +39,8 @@ cc.Class({
             return;
         let num_1 = Math.ceil(Global.jumpappObject.length/2);
         let num_2 = Global.jumpappObject.length-num_1;
-        this.jumplunbo_content.width = num_1*110 + num_1*20;
-        this.jumplunbo_content_2.width = num_2 *110 + num_2*20;
+        this.jumplunbo_content.width = num_1*84 + num_1*40;
+        this.jumplunbo_content_2.width = num_2 *84 + num_2*40;
         if(this.jumplunbo_content.width>750){
 
             this.outpos = this.jumplunbo_content.x = (this.jumplunbo_content.width-750)/2;

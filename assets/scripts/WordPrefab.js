@@ -23,7 +23,7 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        this.word_index = 0;
+        this.word_index = -1;
         cc.game.on("idiomRight",function(indexnum){
             if(indexnum == this.indexnum){
                 this.ziimg.active = true;

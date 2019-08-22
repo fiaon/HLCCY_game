@@ -24,7 +24,7 @@
       }
     ],
     "_active": true,
-    "_level": 2,
+    "_level": 1,
     "_components": [
       {
         "__id__": 36
@@ -1273,6 +1273,9 @@
     "_enabled": true,
     "sharebtn": {
       "__id__": 24
+    },
+    "carimg": {
+      "__id__": 22
     },
     "_id": ""
   },

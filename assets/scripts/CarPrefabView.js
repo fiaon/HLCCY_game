@@ -13,6 +13,7 @@ cc.Class({
 
     properties: {
         sharebtn:cc.Node,
+        carimg:cc.Sprite,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -21,11 +22,19 @@ cc.Class({
 
     start () {
         this.ShareBtnFangSuo();
+        let self = this;
+        Global.carlvl++;
+        let url_car ="car_"+Global.carlvl+'.png';
+        cc.loader.loadRes(url_car, cc.SpriteFrame, function (err, spriteFrame) {
+            self.carimg.spriteFrame = spriteFrame;
+        });
+        Global.SetUserInfo();
     },
     init(){
 
     },
     closeBtn(){
+        cc.find("Canvas").getComponent("start").UserPower();
         this.node.destroy();
     },
     shareBtn(){

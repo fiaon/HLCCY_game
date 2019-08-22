@@ -2,13 +2,17 @@ window.Global = {
     name:null,
     avatarUrl:null,
     sex:null,
-    power:1,                //体力点数
+    power:null,             //体力点数
+    nexttime:null,          //下个体力的时间
     maxpower:5,             //最大体力值
     prefab_tip: null,       //提示
-    level:1,                //玩家解锁等级
-    gamelevel:1,            //游戏关卡等级
+    level:null,             //玩家解锁等级
+    gamelevel:null,         //游戏关卡等级
+    playerlvl:null,         //人物等级
+    carlvl:null,            //车辆等级
     UserLvlData:null,       //玩家升级职业的数据
     CarLvlData:null,        //车辆信息
+    gamedata:null,
 
 
     Time_Last: 0,                    //切后台时间
@@ -36,47 +40,54 @@ window.Global = {
     url_UserAuthV2: "game/UserAuthV2", 
     url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
     url_GetMission: "HLCY/GetUserMission",                  //任务数据
-    url_GetUserData: "game/GetUserData",                    //获取数据
-    url_SetUserData: "game/SetUserData",                    //存储数据
+    url_SetUserInfo: "HLCY/SetUserInfo",                    //存储数据
     url_GetUserLvlData:"HLCY/GetUserLvlData",               //等级信息
     url_GetCarData:"HLCY/GetCarData",                       //车辆信息
-
-    /**
-     * 读取用户数据
-     */
-    GetUserData(){
+    url_GetUserInfo:"HLCY/GetUserInfo",                     //获取玩家信息
+    url_AddPower:"HLCY/AddPower",                           //增加体力
+    //增加体力
+    AddPower(num,callback){
         let parme = {
-            appid: this.appid,
-            sessionId: this.sessionId,
-        };
-        this.Post(this.url_GetUserData, parme, (res) => {
-
-        });
+            sessionid:this.sessionId,
+            num:num,
+        }
+        this.Post(this.url_AddPower,parme,callback);
     },
+    //获取用户信息
+    GetUserInfo(callback){
+        let parme = {
+            sessionid:this.sessionId,
+        }
+        this.Post(this.url_GetUserInfo,parme,callback);
+    },
+    //获取关卡数据
+    GetLvldata(lvl,callback){
+        let parme = {
+            lvl:lvl,
+            sessionid:this.sessionId,
+        }
+        this.Post(this.url_GetLvlData,parme,callback);
+    },
+    
     /**
      * 存储用户数据
      */
-    SetUserData() {
+    SetUserInfo() {
         let parme = {
-            appid: this.appid,
-            sessionId: this.sessionId,
-            udata: 0,               
-            score:0,
+            sessionid: this.sessionId,
+            carlvl: this.carlvl,               
+            playerlvl:this.playerlvl,
             lvl: this.level,
-            ucount: 0,
-            zcount: 0,
         };
-        this.Post(this.url_SetUserData, parme, () => {
-            this.GetUserData();
-        });
+        this.Post(this.url_SetUserInfo, parme);
     },
     /**
      * 获取任务列表
      */
     GetMission(callback) {
         let parme = {
-            sessionId: this.sessionId,
-            appid: this.appid,
+            sessionid: this.sessionId,
+            // appid: this.appid,
         };
         this.Post(this.url_GetMission + "?t=" + (new Date()).getTime(), parme, (res) => {
             if (callback) {
@@ -134,12 +145,15 @@ window.Global = {
      * 登陆接口
      * @param {*} parme 参数
      */
-    UserLogin(parme) {
+    UserLogin(parme,callback) {
         let self = this;
         // 上线前注释console.log("parme =登录= ", parme);
         this.Post(this.url_UserLoginV2, parme, (res) => {
             self.sessionId = res.result.sessionid;
-            Global.ShouQuan();
+            if(callback){
+                callback(res);
+            }
+            //Global.ShouQuan();
         });
     },
      /**
@@ -372,7 +386,7 @@ window.Global = {
                 method: 'post',
                 data: parme,
                 header: {
-                    'content-type': 'application/json' // 默认值
+                    'content-type': 'application/x-www-form-urlencoded'//'application/json' // 默认值
                 },
                 success(res) {
                     if (callback) {
@@ -424,7 +438,10 @@ window.Global = {
                     .catch(err => console.log(err.errMsg));
                 videoAd.offClose();
                 videoAd.onClose(res => {
-    
+                    //强行暂停音乐 如果不暂停，调用resumeMusic是无效的，因为是微信让声音消失了
+                    cc.audioEngine.pauseMusic();
+                    //恢复音乐播放，比如调用
+                    cc.audioEngine.resumeMusic();
                     if (res && res.isEnded || res === undefined) {
                         // self.UserInfo.AddGold(addvalue);
                         if (success)

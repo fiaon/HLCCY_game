@@ -32,7 +32,7 @@ cc.Class({
     Success(){
         this.boxview.active = false;
         this.powerview.active = true;
-        this.powernum = Math.round(Math.random())+1;
+        this.powernum = Math.round(Math.random()+1);
         this.powerlabel.string = "x"+this.powernum;
     },
     Failed(){
@@ -43,6 +43,10 @@ cc.Class({
     },
     powerCloseBtn(){
         //获取体力在关闭页面TODO
+        Global.AddPower(this.powernum,(res)=>{
+            
+        });
+        cc.find("Canvas").getComponent("start").UserPower();
         this.node.destroy();
     },
     shareBtn(){

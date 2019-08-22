@@ -13,6 +13,8 @@ cc.Class({
 
     properties: {
         sharebtn:cc.Node,
+        player_img:cc.Sprite,
+        title_label:cc.Label,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -21,11 +23,20 @@ cc.Class({
 
     start () {
         this.ShareBtnFangSuo();
+        let self = this;
+        Global.playerlvl++;
+        let url_player ="user_"+Global.playerlvl+'.png';
+        cc.loader.loadRes(url_player, cc.SpriteFrame, function (err, spriteFrame) {
+            self.player_img.spriteFrame = spriteFrame;
+        });
+        this.title_label.string = "恭喜升级到"+Global.UserLvlData[Global.playerlvl-1].name.trim();
+        Global.SetUserInfo();
     },
     init(){
 
     },
     closeBtn(){
+        cc.find("Canvas").getComponent("start").UserPower();
         this.node.destroy();
     },
     shareBtn(){

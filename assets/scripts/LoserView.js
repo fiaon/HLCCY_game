@@ -13,6 +13,7 @@ cc.Class({
 
     properties: {
         arr_word:new Array(),
+        lvl_label:cc.Label,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -20,7 +21,14 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        //this.arr_word = new Array();
+
+        // if(Global.playerlvl<Global.carlvl){
+        //     let num_lvl = Global.UserLvlData[Global.playerlvl].gamelvl - Global.level;
+        //     this.lvl_label.string = "还有"+num_lvl+"关后可升级最新人物";
+        // }else{
+        //     let num_lvl = Global.CarLvlData[Global.carlvl-1].gamelvl - Global.level;
+        //     this.lvl_label.string = "还有"+num_lvl+"关后可升级最新车辆";
+        // }
     },
     AddErrorWord(num){
         this.arr_word.push(num);

@@ -35,14 +35,14 @@
     "orientation": "portrait",
     "zip": false
   },
-  "startScene": "6f9f89eb-3180-42e1-b2a0-1bf5e737e9e8",
+  "startScene": "a7c65c9a-02f4-4c05-bda0-a10ac6424275",
   "title": "HLCCY_game",
   "webOrientation": "auto",
   "wechatgame": {
     "REMOTE_SERVER_ROOT": "",
     "appid": "wx4fb5b2de70ef1649",
     "orientation": "portrait",
-    "subContext": ""
+    "subContext": "RankCeShi"
   },
   "xxteaKey": "d34f40e9-9027-4b",
   "zipCompressJs": true

@@ -55,6 +55,11 @@ cc.Class({
             default:null,
             type:cc.Prefab,
         },
+        level_label:cc.Label,
+        display:{
+            type:cc.Sprite,
+            default:null 
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -85,27 +90,20 @@ cc.Class({
 
     start() {
         this.BtnTishiFangSuo();
+        //给子域发送消息
+        var openDataContext = wx.getOpenDataContext();
+        openDataContext.postMessage({
+            text:'game',
+        });
+        this.tex = new cc.Texture2D();
+
         this.dataArr = null;       //消失的字数组的下标也是光标的位置
-        this.oldArr = [];       //用来打乱的数组
+        this.oldArr = [];         //用来打乱的数组
         this.haveziArr = [];      //是否存在字(用来显示光标的位置)
         this.index = 0;
         this.loser = null;
-        let data = {
-            "data": {
-                "lvl": 7,
-                "conf": {
-                    "id": 7,
-                    "word": ["夕", "阳", "西", "下", "不", "春", "投", "明", "明", "白", "白", "机", "不", "雪", "颠", "倒", "黑", "白", "把"],
-                    "idiom": ["夕阳西下", "阳春白雪", "明明白白", "不明不白", "颠倒黑白", "投机倒把"],
-                    "posx": [5, 6, 7, 8, 4, 6, 2, 4, 5, 6, 7, 2, 4, 6, 1, 2, 3, 4, 2],
-                    "posy": [7, 7, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 3, 3, 3, 3, 2],
-                    "answer": [1, 7, 9, 13, 15, 17],
-                    "barrier": []
-                }
-            },
-            "errcode": 0,
-            "errmsg": ""
-        };
+        //获取当前关卡数据
+        let data = Global.gamedata;
         console.log(data);
         let _words = data.data.conf.word;
         let _idiom = data.data.conf.idiom;
@@ -113,6 +111,7 @@ cc.Class({
         let _posy = data.data.conf.posy;
 
         let _answer = data.data.conf.answer;
+        this.level_label.string = "第"+data.data.lvl+"关";
 
         var _letters = new Map();
         for (let i = 0; i < _words.length; i++) {
@@ -126,7 +125,7 @@ cc.Class({
 
         for (let i = 0; i < _answer.length; i++) {
             this.map_answer.set((_posx[_answer[i]] * 10 + _posy[_answer[i]]), _answer[i]);
-            this.map_temp.set((_posx[_answer[i]] * 10 + _posy[_answer[i]]), 0);
+            this.map_temp.set((_posx[_answer[i]] * 10 + _posy[_answer[i]]), -1);
             this.arr_answer.push((_posx[_answer[i]] * 10 + _posy[_answer[i]]));
         }
         console.log(this.map_answer);
@@ -148,7 +147,7 @@ cc.Class({
                 this.haveziArr[i] = 0;
             }
             //打乱排序
-            //this.UpsetArray();
+            +this.UpsetArray();
             for (let j = 0; j < this.dataArr.answer.length; j++) {
                 let clickword = cc.instantiate(this.clickwordPrefab);
                 let __answer = this.dataArr.answer[j];
@@ -168,7 +167,7 @@ cc.Class({
 
                 // let word_key = x * 10 + y;
                 _wordPrefab.setPos(x, y);
-                if (this.map_temp.has(word_key) && this.map_temp.get(word_key) == 0) {
+                if (this.map_temp.has(word_key) && this.map_temp.get(word_key) == -1) {
                     this.map_temp.set(word_key, id);
                 }
 
@@ -185,10 +184,10 @@ cc.Class({
 
             //判断填写的字所在的位置 含有那些成语
             {
-                let start_ = 0;
                 let count_ = 0;
-                let end_ = 0;
-                for (let i = 1; i <= 9; i++) {
+                let start_ = new Array();
+                let end_ = new Array();
+                for (let i = 0; i < 9; i++) {
                     let temp_word = i * 10 + y;
                     if (_index_letters.has(temp_word)) {
                         count_ += 1;
@@ -198,52 +197,54 @@ cc.Class({
                     }
     
                     if (count_ == 4) {
-                        end_ = i;
-                        start_ = end_ - 3;
+                        end_.push(i);
+                        start_.push(i- 3);
                     }
                 }
-                if (end_ - start_ == 3) {
-                    let bFinish = true;
-                    let bRight = true;
-                    //横向的已经找出 判断是否已经填写满，或者是否正确
-                    for (let i = start_; i <= end_; i++) {
-                        let temp_word = i * 10 + y;
-                        if (this.map_temp.has(temp_word)) {
-                            if (this.map_temp.get(temp_word) == 0&&word!=_index_letters.has(temp_word)) {
-                                bFinish = false;
-                                bRight = false;
-                            }
-                            else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
-                                bRight = false;
-                            }
-                        }
-                    }
-    
-    
-                    if (bRight) {
-                        console.log(`横向 %d,%d is right`, start_, end_);
-                        for(let i = start_; i <= end_; i++){
+                for(let e=0;e<end_.length;e++){
+                    if (end_[e] - start_[e] == 3) {
+                        let bFinish = true;
+                        let bRight = true;
+                        //横向的已经找出 判断是否已经填写满，或者是否正确
+                        for (let i = start_[e]; i <= end_[e]; i++) {
                             let temp_word = i * 10 + y;
-                            cc.game.emit("idiomRight",_letters.get(temp_word));
-                        }
-                    }
-                    else {
-                        if (bFinish == false){
-                            console.log(`横向 %d,%d is not finished`, start_, end_);
-                        }
-                        else{
-                            console.log(`横向 %d,%d is wrong`, start_, end_);
-                            if(this.loser ==null){
-                                this.loser =  cc.instantiate(this.loserView);
-                                this.node.addChild(this.loser);
+                            if (this.map_temp.has(temp_word)) {
+                                if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
+                                    bFinish = false;
+                                    bRight = false;
+                                }
+                                else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
+                                    bRight = false;
+                                }
                             }
-                            for(let i = start_; i <= end_; i++){
+                        }
+        
+        
+                        if (bRight) {
+                            // console.log(`横向 %d,%d is right`, start_[e], end_[e]);
+                            for(let i = start_[e]; i <= end_[e]; i++){
                                 let temp_word = i * 10 + y;
-                                if (this.map_temp.has(temp_word)){
-                                    if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
-                                        //这里就是填错的字
-                                        this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
-                                        //cc.game.emit("idiomError",_letters.get(temp_word));
+                                cc.game.emit("idiomRight",_letters.get(temp_word));
+                            }
+                        }
+                        else {
+                            if (bFinish == false){
+                                // console.log(`横向 %d,%d is not finished`, start_[e], end_[e]);
+                            }
+                            else{
+                                // console.log(`横向 %d,%d is wrong`, start_[e], end_[e]);
+                                if(this.loser ==null){
+                                    this.loser =  cc.instantiate(this.loserView);
+                                    this.node.addChild(this.loser);
+                                }
+                                for(let i = start_[e]; i <= end_[e]; i++){
+                                    let temp_word = i * 10 + y;
+                                    if (this.map_temp.has(temp_word)){
+                                        if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
+                                            //这里就是填错的字
+                                            this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
+                                            //cc.game.emit("idiomError",_letters.get(temp_word));
+                                        }
                                     }
                                 }
                             }
@@ -252,10 +253,10 @@ cc.Class({
                 }
             }
             {
-                let start_ = 0;
                 let count_ = 0;
-                let end_ = 0;
-                for (let i = 1; i <= 9; i++) {
+                let start_ = new Array();
+                let end_ = new Array();
+                for (let i = 0; i < 9; i++) {
                     let temp_word = x*10 + i;
                     if (_index_letters.has(temp_word)) {
                         count_ += 1;
@@ -265,55 +266,57 @@ cc.Class({
                     }
     
                     if (count_ == 4) {
-                        end_ = i;
-                        start_ = end_ - 3;
+                        end_.push(i);
+                        start_.push(i- 3);
                     }
                 }
-                if (end_ - start_ == 3) {
-                    let bFinish = true;
-                    let bRight = true;
-                    //横向的已经找出 判断是否已经填写满，或者是否正确
-                    for (let i = start_; i <= end_; i++) {
-                        let temp_word = x*10 + i;
-                        if (this.map_temp.has(temp_word)) {
-                            if (this.map_temp.get(temp_word) == 0&&word!=_index_letters.has(temp_word)) {
-                                bFinish = false;
-                                bRight = false;
-                            }
-                            else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
-                                bRight = false;
-                            }
-                        }
-                    }
-    
-    
-                    if (bRight) {
-                        console.log(`纵向 %d,%d is right`, start_, end_);
-                        for(let i = start_; i <= end_; i++){
-                            let temp_word = x * 10 + i;
-                            cc.game.emit("idiomRight",_letters.get(temp_word));
-                        }
-                    }
-                    else {
-                        if (bFinish == false){
-                            console.log(`纵向 %d,%d is not finished`, start_, end_);
-                        }
-                        else{
-                            console.log(`纵向 %d,%d is wrong`, start_, end_);
-                            if(this.loser ==null){
-                                this.loser =  cc.instantiate(this.loserView);
-                                this.node.addChild(this.loser);
-                            }
-                            for(let i = start_; i <= end_; i++){
-                                let temp_word = x * 10 + i;
-                                if (this.map_temp.has(temp_word)){
-                                    if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
-                                        this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
-                                        //cc.game.emit("idiomError",_letters.get(temp_word));
-                                    }
+                for(let e=0;e<end_.length;e++){
+                    if (end_[e] - start_[e] == 3) {
+                        let bFinish = true;
+                        let bRight = true;
+                        //横向的已经找出 判断是否已经填写满，或者是否正确
+                        for (let i = start_[e]; i <= end_[e]; i++) {
+                            let temp_word = x*10 + i;
+                            if (this.map_temp.has(temp_word)) {
+                                if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
+                                    bFinish = false;
+                                    bRight = false;
+                                }
+                                else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
+                                    bRight = false;
                                 }
                             }
-                        }   
+                        }
+        
+        
+                        if (bRight) {
+                            //console.log(`纵向 %d,%d is right`, start_[e], end_[e]);
+                            for(let i = start_[e]; i <= end_[e]; i++){
+                                let temp_word = x * 10 + i;
+                                cc.game.emit("idiomRight",_letters.get(temp_word));
+                            }
+                        }
+                        else {
+                            if (bFinish == false){
+                                //console.log(`纵向 %d,%d is not finished`, start_[e], end_[e]);
+                            }
+                            else{
+                                //console.log(`纵向 %d,%d is wrong`, start_[e], end_[e]);
+                                if(this.loser ==null){
+                                    this.loser =  cc.instantiate(this.loserView);
+                                    this.node.addChild(this.loser);
+                                }
+                                for(let i = start_[e]; i <= end_[e]; i++){
+                                    let temp_word = x * 10 + i;
+                                    if (this.map_temp.has(temp_word)){
+                                        if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
+                                            this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
+                                            //cc.game.emit("idiomError",_letters.get(temp_word));
+                                        }
+                                    }
+                                }
+                            }   
+                        }
                     }
                 }
             }
@@ -333,7 +336,7 @@ cc.Class({
             //判断2个map是否都一样（胜利条件）
             let winnum =0;
             for(let i=0;i<this.arr_answer.length;i++){
-                if(this.map_temp.get(this.arr_answer[i]) !=0){
+                if(this.map_temp.get(this.arr_answer[i]) !=-1){
                     //this.map_temp.get(this.arr_answer[i]) != this.map_answer.get(this.arr_answer[i]
                     if(_words[this.map_temp.get(this.arr_answer[i])] != _words[this.map_answer.get(this.arr_answer[i])]){
                         break;
@@ -346,7 +349,8 @@ cc.Class({
             }
             if(winnum == this.arr_answer.length){
                 //TODO
-                console.log("获胜")
+                Global.level ++;
+                Global.SetUserInfo();
                 let win =  cc.instantiate(this.winView);
                 this.node.addChild(win);
             }
@@ -356,10 +360,10 @@ cc.Class({
         cc.game.on("showWord", function (index, id, word_key) {
             this.index = index;
             this.haveziArr[index] = 0;
-            console.log("word_key:" + word_key);
+            // console.log("word_key:" + word_key);
             
-            if (this.map_temp.has(word_key) && this.map_temp.get(word_key) != 0) {
-                this.map_temp.set(word_key, 0);
+            if (this.map_temp.has(word_key) && this.map_temp.get(word_key) != -1) {
+                this.map_temp.set(word_key, -1);
             }
 
             for (let i = 0; i < this.clickcontent.children.length; i++) {
@@ -386,7 +390,6 @@ cc.Class({
         let game_jump = cc.instantiate(this.game_jumpApp);
         game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 68;
         game_jump.y = jumpIndexArr[ranindex]%10 * 68;
-        console.log("广告位置: ",parseInt(jumpIndexArr[ranindex]/10),jumpIndexArr[ranindex]);
         this.qipan.addChild(game_jump);
 
     },
@@ -425,5 +428,17 @@ cc.Class({
         );
         return action;
     },
-    // update (dt) {},
+    _updaetSubDomainCanvas () {
+        if (!this.tex) {
+            return;
+        }
+        var openDataContext = wx.getOpenDataContext();
+        var sharedCanvas = openDataContext.canvas;
+
+        this.tex.initWithElement(sharedCanvas);
+        this.display.spriteFrame = new cc.SpriteFrame(this.tex);
+    },
+    update (dt) {
+        this._updaetSubDomainCanvas();
+    },
 });
