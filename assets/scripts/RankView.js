@@ -23,7 +23,6 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        this.canvasAdopt();
         this.display.node.setContentSize(cc.view.getVisibleSize());
         if(CC_WECHATGAME){
             //给子域发送消息
@@ -63,22 +62,8 @@ cc.Class({
     update (dt) {
         this._updaetSubDomainCanvas();
     },
-    canvasAdopt() {
-        // 适配解决方案
-        let canvas = cc.find('Canvas').getComponent(cc.Canvas);
-        // 设计分辨率比
-        let rateR = canvas.designResolution.height/canvas.designResolution.width;
-        // 显示分辨率比
-        let rateV = cc.view.getVisibleSize().height / cc.view.getVisibleSize().width;
-        console.log("winSize: rateR: " + rateR + " rateV: " + rateV);
-        if (rateV > rateR) {
-        canvas.fitHeight = false;
-        canvas.fitWidth = true;
-        console.log("winSize: fitWidth");
-        } else {
-        canvas.fitHeight = true;
-        canvas.fitWidth = false;
-        console.log("winSize: fitHeight");
-        }
-    }
+    //分享按钮
+    shareBtn(){
+        Global.ShareApp();
+    },
 });

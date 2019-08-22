@@ -1,0 +1,55 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "btnclip",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.85,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": "2",
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": -0.06666666666666667,
+            "value": {
+              "__uuid__": "422b5113-ce5c-41b4-9cbf-b7cbb30f9185"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "422b5113-ce5c-41b4-9cbf-b7cbb30f9185"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "422b5113-ce5c-41b4-9cbf-b7cbb30f9185"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "fa04bdf3-d66a-472c-8f0d-3298264e6b68"
+            }
+          },
+          {
+            "frame": 0.6666666666666666,
+            "value": {
+              "__uuid__": "fa04bdf3-d66a-472c-8f0d-3298264e6b68"
+            }
+          },
+          {
+            "frame": 0.8333333333333334,
+            "value": {
+              "__uuid__": "fa04bdf3-d66a-472c-8f0d-3298264e6b68"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

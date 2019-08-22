@@ -278,7 +278,7 @@ window.Global = {
     },
     Getinfo() {
         var self = this;
-        this.Get("https://wx.zaohegame.com/game/shareimg?appid=wxfa819a83fa221978", (obj) => {
+        this.Get("https://wx.zaohegame.com/game/shareimg?appid=wx4fb5b2de70ef1649", (obj) => {
             if (obj.state == 1) {
                 this.shareimg = obj.result;
             }
@@ -311,6 +311,21 @@ window.Global = {
                             // 上线前注释console.log(i, err);
                         }
                     });
+                    if(this.jumpappObject[i].img2 !=""){
+                        cc.loader.load({ url: this.jumpappObject[i].img2, type: "jpg" }, function (err, res) {
+                            self.jumpappObject[i].lunbo = null;
+                            if (err == null) {
+                                let spriteFrame = new cc.SpriteFrame(res);
+                                self.jumpappObject[i].lunbo  = spriteFrame;
+                                
+                            }
+                            else {
+                                console.log(i, err);
+                            }
+                        });
+                    }else{
+                        self.jumpappObject[i].lunbo = null;
+                    }
                 }
                 
             }

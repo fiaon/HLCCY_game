@@ -65,6 +65,10 @@ cc.Class({
             default: [],
             type: cc.SpriteFrame
         },
+        jumpAppPrefab: {
+            default: [],
+            type: cc.Node,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -85,6 +89,7 @@ cc.Class({
 
         //Global.addListener();
         this.ShowBoxView();
+        this.ChangeJumpAppSelectSprite();
     },
     BackMusicBtn(){
         if(this.isplaymusic == false){
@@ -261,6 +266,74 @@ cc.Class({
         let addpower = cc.instantiate(this.prefab_addpower)
         if(addpower){
             this.node.addChild(addpower);
+        }
+    },
+    /**
+     * 循环切换广告图片的方法
+     */
+    ChangeJumpAppSelectSprite() {
+        let Arr_jumpApp_Sprite = [];
+        for (let i = 0; i < this.jumpAppPrefab.length; i++) {
+            let sprite = this.jumpAppPrefab[i].getChildByName("sprite");
+            let temp = sprite.getComponent(cc.Sprite);
+            Arr_jumpApp_Sprite.push(temp);
+            this.jumpAppPrefab[i].index = i;
+            this.jumpAppPrefab[i].on("touchend", this.TouchEnd, this);
+            this.JumpAppFangSuo(this.jumpAppPrefab[i]);
+        }
+        this.schedule(() => {
+            for (let j = 0; j < this.jumpAppPrefab.length; j++) {
+                // // 上线前注释console.log(" Arr_jumpApp_Sprite[j].index == ", Arr_jumpApp_Sprite[j].index);
+                if (this.jumpAppPrefab[j].index < Global.jumpappObject.length - 1) {
+                    this.jumpAppPrefab[j].index++;
+                } else {
+                    this.jumpAppPrefab[j].index = 0;
+                }
+                Arr_jumpApp_Sprite[j].spriteFrame = Global.jumpappObject[this.jumpAppPrefab[j].index].sprite;
+            }
+        }, 3.0, cc.macro.REPEAT_FOREVER, 0.1);
+    },
+
+    /**
+    * 游戏广告按钮的放缩
+    */
+    JumpAppFangSuo: function (node) {
+        var self = this;
+        this.schedule(function () {
+            var action = self.GGFangSuoFun();
+            node.runAction(action);
+        }, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
+    },
+
+    /**
+     * 按钮放缩方法
+     */
+    GGFangSuoFun: function () {
+        var action = cc.sequence(
+            cc.scaleTo(0.5, 1.0, 1.0),
+            cc.scaleTo(0.5, 1.2, 1.2),
+        );
+        return action;
+    },
+
+    TouchEnd(event) {
+        // 上线前注释console.log("event == ", event.target);
+       
+        event.stopPropagation();
+        // 阿拉丁埋点
+        wx.aldSendEvent('游戏推广',{'页面' : '游戏登陆_图片推广'});
+
+        if (CC_WECHATGAME) {
+            wx.navigateToMiniProgram({
+                appId: Global.jumpappObject[event.target.index].apid,
+                path: Global.jumpappObject[event.target.index].path,
+                success: function (res) {
+                    // 上线前注释console.log(res);
+                },
+                fail: function (res) {
+                    // 上线前注释console.log(res);
+                },
+            });
         }
     },
     // update (dt) {},

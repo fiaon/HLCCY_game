@@ -54,8 +54,9 @@ cc.Class({
         // else {
             this.JumpCallBack();
         // }
-        this.btn_sprite = this.btn.getComponent(cc.Sprite);
-        this.giftAnim();
+        //this.btn_sprite = this.btn.getComponent(cc.Sprite);
+        this.btn.getComponent(cc.Animation).play('btnclip');
+        //this.giftAnim();
         this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;
         this.node.zIndex = cc.macro.MAX_ZINDEX;
     },
@@ -84,13 +85,17 @@ cc.Class({
 
         if (this.hide == false) {
             this.node.runAction(cc.moveTo(0.5, this.hidepos).easing(cc.easeBackIn()));
-            this.btn_sprite.spriteFrame = this.btnSprite[0];
+            //this.btn_sprite.spriteFrame = this.btnSprite[0];
+            this.btn.node.scaleX = 1;
+            this.btn.node.x = 0;
             // 上线前注释console.log("this.node.parent == ", this.node.parent);
             this.zhezhao.active = false;
         }
         else {
             this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
-            this.btn_sprite.spriteFrame = this.btnSprite[1];
+            //this.btn_sprite.spriteFrame = this.btnSprite[1];
+            this.btn.node.scaleX = -1;
+            this.btn.node.x = 19.5;
             this.zhezhao.active = true;
         }
         this.hide = !this.hide;
@@ -102,8 +107,8 @@ cc.Class({
         
         self.giftAnim = cc.repeatForever(
             cc.sequence(
-                cc.skewTo(0.5,-10,10),
-                cc.skewTo(0.5,10,-10)
+                cc.skewTo(0.5,-20,20),
+                cc.skewTo(0.5,20,-20)
             )
         )
         this.gift.runAction(self.giftAnim);

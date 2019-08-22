@@ -77,6 +77,7 @@ cc.Class({
                     // Global.Post(url, parme);
                     console.log("登陆参数",parme);
                     Global.UserLogin(parme,self.loadRemoteAssets());
+                    Global.Getinfo();
                     Global.GetJumpInfo();
                     Global.GetUserLvlData();
                     Global.GetCarData();

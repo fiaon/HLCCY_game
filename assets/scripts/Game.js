@@ -59,7 +59,11 @@ cc.Class({
         display:{
             type:cc.Sprite,
             default:null 
-        }
+        },
+        gglunbo:{
+            default:null,
+            type:cc.Node,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -90,6 +94,7 @@ cc.Class({
 
     start() {
         this.BtnTishiFangSuo();
+        this.ChangeJumpAppSelectSprite();
         //给子域发送消息
         var openDataContext = wx.getOpenDataContext();
         openDataContext.postMessage({
@@ -147,7 +152,7 @@ cc.Class({
                 this.haveziArr[i] = 0;
             }
             //打乱排序
-            +this.UpsetArray();
+            this.UpsetArray();
             for (let j = 0; j < this.dataArr.answer.length; j++) {
                 let clickword = cc.instantiate(this.clickwordPrefab);
                 let __answer = this.dataArr.answer[j];
@@ -158,6 +163,7 @@ cc.Class({
 
         //点击下面字的监听 放上去 word_key map中的
         cc.game.on("clickWord", function (id, word) {
+            this.loser =null;
             var _wordPrefab = this.qipan.getChildByName(this.oldArr[this.index].toString()).getComponent("WordPrefab");
             let x = _posx[this.selectId];
             let y = _posy[this.selectId];
@@ -377,20 +383,30 @@ cc.Class({
             this.select.y = this.dataArr.posy[this.oldArr[this.index]] * 68;
         }, this);
 
-        let jumpIndexArr = new Array();
-        for(let i=0;i<9;i++){
-            for(let j=0;j<9;j++){
-                let jumpadd = i*10+j;
-                if(_index_letters.has(jumpadd) ==false){
-                    jumpIndexArr.push(jumpadd);
+        if(CC_WECHATGAME){
+            let jumpIndexArr = new Array();
+            for(let i=0;i<9;i++){
+                for(let j=0;j<9;j++){
+                    let jumpadd = i*10+j;
+                    if(_index_letters.has(jumpadd) ==false){
+                        jumpIndexArr.push(jumpadd);
+                    }
                 }
             }
+            let ranindex =Math.floor( Math.random()*jumpIndexArr.length);
+            let game_jump = cc.instantiate(this.game_jumpApp);
+            game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 68;
+            game_jump.y = jumpIndexArr[ranindex]%10 * 68;
+            let src = game_jump.getComponent(require("JumpAppScript"));
+            let src_index = Math.floor(Math.random()*Global.jumpappObject.length);
+            if(src){
+                if (src) {
+                    src.index = src_index;
+                }
+                src.sprite.spriteFrame = Global.jumpappObject[src_index].sprite;
+            }
+            this.qipan.addChild(game_jump);
         }
-        let ranindex =Math.floor( Math.random()*jumpIndexArr.length);
-        let game_jump = cc.instantiate(this.game_jumpApp);
-        game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 68;
-        game_jump.y = jumpIndexArr[ranindex]%10 * 68;
-        this.qipan.addChild(game_jump);
 
     },
     BackBtn() {
@@ -440,5 +456,41 @@ cc.Class({
     },
     update (dt) {
         this._updaetSubDomainCanvas();
+    },
+    /**
+     * 循环切换广告图片的方法
+     */
+    ChangeJumpAppSelectSprite() {
+        let sprite = this.gglunbo.getComponent(cc.Sprite);
+        this.gglunbo.index = 0;
+        this.gglunbo.on("touchend", this.TouchEnd, this);
+       
+        this.schedule(() => {
+            if (this.gglunbo.index < Global.jumpappObject.length - 1) {
+                this.gglunbo.index++;
+            } else {
+                this.gglunbo.index = 0;
+            }
+            if(Global.jumpappObject[this.gglunbo.index].lunbo!=null){
+                sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].lunbo;
+            }else{
+                sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].sprite;
+            }
+        }, 3.0, cc.macro.REPEAT_FOREVER, 0.1);
+    },
+    TouchEnd(event) {
+        event.stopPropagation();
+        if (CC_WECHATGAME) {
+            wx.navigateToMiniProgram({
+                appId: Global.jumpappObject[event.target.index].apid,
+                path: Global.jumpappObject[event.target.index].path,
+                success: function (res) {
+                    // 上线前注释console.log(res);
+                },
+                fail: function (res) {
+                    // 上线前注释console.log(res);
+                },
+            });
+        }
     },
 });
