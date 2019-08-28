@@ -612,10 +612,8 @@
     "_fontSize": 48,
     "_lineHeight": 50,
     "_enableWrapText": true,
-    "_N$file": {
-      "__uuid__": "0e18f69c-2274-4895-aa0d-7a3d17d9ed32"
-    },
-    "_isSystemFontUsed": false,
+    "_N$file": null,
+    "_isSystemFontUsed": true,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_N$horizontalAlign": 1,
@@ -1348,7 +1346,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "content",
+    "_name": "content_1",
     "_objFlags": 0,
     "_parent": {
       "__id__": 34

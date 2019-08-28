@@ -20,7 +20,9 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        //this.selectbtn = cc.find("Canvas/qipanbg/9*9/select_img");
+        this.node.on("touchstart", this.onTouchStart, this);
+        this.node.on("touchend", this.onTouched, this);
+        this.isclick = true;
     },
 
     init(id,word, posx, posy){
@@ -31,12 +33,31 @@ cc.Class({
         // 无效
         this.word_index = posx * 10 + posy;
     },
-
-    clickBtn(){
-        this.node.active = false;
-        cc.game.emit("clickWord",this.selectID,this.selectword);
+    onTouchStart(){
+        if(this.isclick){
+            var action = cc.scaleTo(0.2, 1.5, 1.5);
+            this.node.runAction(action);
+        }
     },
-
-  
+    onTouched(){
+        if(this.isclick){
+            let self = this;
+            var action = cc.sequence(cc.scaleTo(0.3, 0, 0),cc.callFunc(function(){
+                self.node.opacity  = 0;
+                cc.audioEngine.play(Global.clip_click, false);
+                self.isclick = false;
+            }));
+            this.node.runAction(action);
+            cc.game.emit("clickWord",this.selectID,this.selectword);
+        }
+    },
+    ChangeState(){
+        let self = this;
+        this.node.opacity =255;
+        var action = cc.sequence(cc.scaleTo(0.2, 1, 1),cc.callFunc(function(){
+            self.isclick = true;
+        }));
+        this.node.runAction(action);
+    },
     // update (dt) {},
 });

@@ -28,10 +28,13 @@
     "_components": [
       {
         "__id__": 8
+      },
+      {
+        "__id__": 9
       }
     ],
     "_prefab": {
-      "__id__": 9
+      "__id__": 10
     },
     "_opacity": 255,
     "_color": {
@@ -48,8 +51,8 @@
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
+      "x": 0.5,
+      "y": 0.5
     },
     "_position": {
       "__type__": "cc.Vec3",
@@ -115,8 +118,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 33,
-      "y": 33,
+      "x": 0,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -211,8 +214,8 @@
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
+      "x": 0.5,
+      "y": 0.5
     },
     "_position": {
       "__type__": "cc.Vec3",
@@ -291,6 +294,16 @@
       "__id__": 3
     },
     "labelGame": null,
+    "_id": ""
+  },
+  {
+    "__type__": "9728f3AdiVG24u3+zRuwlbG",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
     "_id": ""
   },
   {

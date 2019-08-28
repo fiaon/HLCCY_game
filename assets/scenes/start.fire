@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 1.0742020922783835,
-      "y": 1.0742020922783835,
+      "x": 0.2035232383808096,
+      "y": 0.2035232383808096,
       "z": 1
     },
     "_quat": {
@@ -791,7 +791,7 @@
     "component": "",
     "_componentId": "63031nlseBDx5ICRd/Qxcx6",
     "handler": "FreePowerBtn",
-    "customEventData": ""
+    "customEventData": "btn_"
   },
   {
     "__type__": "cc.Node",
@@ -1918,7 +1918,7 @@
     "component": "",
     "_componentId": "63031nlseBDx5ICRd/Qxcx6",
     "handler": "FreePowerBtn",
-    "customEventData": ""
+    "customEventData": "taskBtn"
   },
   {
     "__type__": "cc.Node",
@@ -5002,6 +5002,12 @@
     },
     "clip_backmusic": {
       "__uuid__": "059c6976-c2a4-4174-bfef-580adc204261"
+    },
+    "clip_click": {
+      "__uuid__": "01989e85-a466-4c07-92e3-f1ad0a2c9c56"
+    },
+    "clip_click_2": {
+      "__uuid__": "ca51f6da-2d0d-4d7e-bf6e-84f283e509db"
     },
     "anim_target": {
       "__id__": 73

@@ -23,22 +23,40 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('惊喜宝箱_页面访问数');
+        this.startTime = Date.now();
+
         this.ShareBtnFangSuo();
+        Global.boxnum--;
+        Global.SetUserData();
     },
     videoBtn(){
-        this.Success();
-        //Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this))
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_惊喜宝箱_立即领取');
+                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+            }
+        }
     },
     Success(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '惊喜宝箱_立即领取_是'});
         this.boxview.active = false;
         this.powerview.active = true;
         this.powernum = Math.round(Math.random()+1);
         this.powerlabel.string = "x"+this.powernum;
     },
     Failed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '惊喜宝箱_立即领取_否'});
         Global.ShowTip(this.node, "观看完视频才会有奖励哦");
     },
     boxcloseBtn(){
+        wx.aldSendEvent("惊喜宝箱_页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
+        wx.aldSendEvent('惊喜宝箱_关闭按钮');
         this.node.destroy();
     },
     powerCloseBtn(){
@@ -50,6 +68,7 @@ cc.Class({
         this.node.destroy();
     },
     shareBtn(){
+        wx.aldSendEvent('分享',{'页面' : '惊喜宝箱_炫耀一下'});
         Global.ShareApp();
     },
     /**

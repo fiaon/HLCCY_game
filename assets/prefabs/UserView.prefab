@@ -246,7 +246,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 200,
+      "y": 70,
       "z": 0
     },
     "_scale": {
@@ -615,10 +615,8 @@
     "_fontSize": 48,
     "_lineHeight": 50,
     "_enableWrapText": true,
-    "_N$file": {
-      "__uuid__": "0e18f69c-2274-4895-aa0d-7a3d17d9ed32"
-    },
-    "_isSystemFontUsed": false,
+    "_N$file": null,
+    "_isSystemFontUsed": true,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_N$horizontalAlign": 1,

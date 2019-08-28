@@ -12,8 +12,7 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        sharebtn:cc.Node,
-        carimg:cc.Sprite,
+        
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -21,44 +20,23 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        this.ShareBtnFangSuo();
-        let self = this;
-        Global.carlvl++;
-        let url_car ="car_"+Global.carlvl+'.png';
-        cc.loader.loadRes(url_car, cc.SpriteFrame, function (err, spriteFrame) {
-            self.carimg.spriteFrame = spriteFrame;
-        });
-        Global.SetUserInfo();
-    },
-    init(){
-
-    },
-    closeBtn(){
-        cc.find("Canvas").getComponent("start").UserPower();
-        this.node.destroy();
-    },
-    shareBtn(){
-        wx.aldSendEvent('分享',{'页面' : '车辆升级_炫耀一下'});
-        Global.ShareApp();
+        this.GuangGaoAnim();
     },
     /**
-     * 炫耀一下的放缩
+     * 游戏内小广告动画
      */
-    ShareBtnFangSuo: function () {
+    GuangGaoAnim: function () {
         var self = this;
         this.schedule(function () {
-            var action = self.FangSuoFun();
-            self.sharebtn.runAction(action);
+            var action = self.DouDongFun();
+            self.node.runAction(action);
         }, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
     },
 
-    /**
-     * 按钮放缩方法
-     */
-    FangSuoFun: function () {
+    DouDongFun: function () {
         var action = cc.sequence(
-            cc.scaleTo(0.5, 0.9, 0.9),
-            cc.scaleTo(0.5, 1.1, 1.1),
+            cc.skewTo(0.5,-10,10),
+            cc.skewTo(0.5,10,-10)
         );
         return action;
     },

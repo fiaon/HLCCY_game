@@ -48,6 +48,14 @@ cc.Class({
             default: null,
             type: cc.AudioClip,
         },
+        clip_click:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_click_2:{
+            default:null,
+            type:cc.AudioClip,
+        },
         anim_target:cc.Node,
         anim_pos:cc.Node,
         powerbg:cc.Node,
@@ -76,6 +84,9 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('游戏首页_页面访问数');
+        this.startTime = Date.now();
+
         let self = this;
         this.isplaymusic = true;
         cc.audioEngine.playMusic(this.clip_backmusic, true);
@@ -83,6 +94,9 @@ cc.Class({
         this.power_max = this.powerbg.getChildByName("max");
         this.power_time = this.powerbg.getChildByName("time");
         Global.prefab_tip = this.prefab_tips;
+        Global.clip_click = this.clip_click;
+        Global.clip_click_2 = this.clip_click_2;
+
         if (CC_WECHATGAME) {
             self.UserPower();
         }
@@ -90,6 +104,9 @@ cc.Class({
         //Global.addListener();
         this.ShowBoxView();
         this.ChangeJumpAppSelectSprite();
+        cc.director.preloadScene("game", function () {
+            cc.log("预加载开始scene");
+        });
     },
     BackMusicBtn(){
         if(this.isplaymusic == false){
@@ -135,10 +152,18 @@ cc.Class({
                 }
                 if(Global.playerlvl<Global.carlvl){
                     let num_lvl = Global.UserLvlData[Global.playerlvl].gamelvl - Global.level;
-                    self.lvl_label.string = "还有"+num_lvl+"关后可升级最新人物";
+                    if(num_lvl<=0){
+                        self.lvl_label.string = "当前可以升级人物";
+                    }else{
+                        self.lvl_label.string = "还有"+num_lvl+"关后可升级最新人物";
+                    }
                 }else{
                     let num_lvl = Global.CarLvlData[Global.carlvl-1].gamelvl - Global.level;
-                    self.lvl_label.string = "还有"+num_lvl+"关后可升级最新车辆";
+                    if(num_lvl<=0){
+                        self.lvl_label.string = "当前可以升级车辆";
+                    }else{
+                        self.lvl_label.string = "还有"+num_lvl+"关后可升级最新车辆";
+                    }
                 }
                 self.power_string.string = res.result.power;
                 if(res.result.nexttime>0){
@@ -182,17 +207,24 @@ cc.Class({
     },
     //分享按钮
     shareBtn(){
+        wx.aldSendEvent('分享',{'页面' : '游戏游戏_分享好友'});
         Global.ShareApp();
     },
     //排行榜
     rankBtn(){
+        wx.aldSendEvent('游戏首页_荣耀榜');
         let ranview = cc.instantiate(this.prefab_rankview);
         if(ranview){
             this.node.addChild(ranview);
         }
     },
     //免费体力(试玩任务)
-    FreePowerBtn(){
+    FreePowerBtn(event, customEventData){
+        if(customEventData == "taskBtn"){
+            wx.aldSendEvent('游戏首页_免费体力');
+        }else{
+            wx.aldSendEvent('游戏首页_体力加');
+        }
         let freepowerview = cc.instantiate(this.prefab_taskview);
         if(freepowerview){
             this.node.addChild(freepowerview);
@@ -200,21 +232,54 @@ cc.Class({
     },
     //升级车辆
     CarLevelUpBtn(){
-        //看视频成功显示页面TODO
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                //看视频成功显示页面TODO
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_游戏首页_升级车辆');
+                Global.showAdVedio(this.CarLevelUp.bind(this), this.CarFailed.bind(this));
+            }
+        }
+    },
+    CarLevelUp(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '游戏首页_升级车辆_是'});
         let carview = cc.instantiate(this.prefab_carview);
         if(carview){
             this.node.addChild(carview);
         }
     },
+    CarFailed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '游戏首页_升级车辆_否'});
+        Global.ShowTip(this.node, "观看完视频才能升级哦");
+    },
     //升级人物
     UserLevelUpBtn(){
-        //看视频成功显示页面TODO
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                //看视频成功显示页面TODO
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_游戏首页_升级人物');
+                Global.showAdVedio(this.UserLevelUp.bind(this), this.UserFailed.bind(this));
+            }
+        }
+    },
+    UserLevelUp(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '游戏首页_升级人物_是'});
         let user= cc.instantiate(this.prefab_userview);
         if(user){
             this.node.addChild(user);
         }
     },
+    UserFailed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '游戏首页_升级人物_否'});
+        Global.ShowTip(this.node, "观看完视频才能升级哦");
+    },
     ShowPeopleUpView(){
+        wx.aldSendEvent('游戏首页_人物');
         let peopleview = cc.instantiate(this.prefab_peopleupview)
         if(peopleview){
             this.node.addChild(peopleview);
@@ -222,17 +287,25 @@ cc.Class({
     },
     //宝箱
     ShowBoxView(){
-        let probability = Math.floor(Math.random() * 10);
-        if(probability<=8){
-            let boxview = cc.instantiate(this.prefab_boxview);
-            if(boxview){
-                this.node.addChild(boxview);
+        Global.GetUserData((res)=>{
+            if(res.state == 1){
+                Global.boxnum = res.result.ucount;
+                if(Global.boxnum >5){
+                    let probability = Math.floor(Math.random() * 10);
+                    if(probability<=8){
+                        let boxview = cc.instantiate(this.prefab_boxview);
+                        if(boxview){
+                            this.node.addChild(boxview);
+                        }
+                    }
+                }
             }
-        }
+        })
     },
     //开始游戏
     PlayerBtn(){
         let self =this;
+        wx.aldSendEvent('游戏首页_答题升级');
         //如果体力够
         if(Global.power>0){
             //如果体力是满的
@@ -253,6 +326,9 @@ cc.Class({
                     if(res.state==1){
                         Global.gamedata = res.result.data;
                         cc.director.loadScene("game.fire");
+                        wx.aldSendEvent("游戏首页_页面停留时间",{
+                            "耗时" : (Date.now()-this.startTime)/1000
+                        });
                     }
                 });
             })
@@ -321,7 +397,8 @@ cc.Class({
        
         event.stopPropagation();
         // 阿拉丁埋点
-        wx.aldSendEvent('游戏推广',{'页面' : '游戏登陆_图片推广'});
+        wx.aldSendEvent('游戏推广');
+        wx.aldSendEvent('游戏推广_游戏首页_图片推广');
 
         if (CC_WECHATGAME) {
             wx.navigateToMiniProgram({

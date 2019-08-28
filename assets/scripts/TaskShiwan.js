@@ -33,6 +33,9 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('游戏首页_免费体力页面访问数');
+        this.startTime = Date.now();
+
         let self = this;
         this.ShiWanTaskData = null;
         Global.GetMission((res) => {
@@ -126,6 +129,8 @@ cc.Class({
         this.appid = event.target.GameAppID;
         Global.ShiWanAppid = this.appid;
         // // 上线前注释console.log("this.appid ==", this.appid);
+        wx.aldSendEvent('游戏推广');
+        wx.aldSendEvent('游戏推广_免费体力_试玩列表');
 
         for (let i = 0; i < Global.jumpappObject.length; i++) {
             if (this.appid == Global.jumpappObject[i].apid) {
@@ -197,6 +202,9 @@ cc.Class({
         });
     },
     CloseBtn(){
+        wx.aldSendEvent("游戏首页_免费体力页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
         this.node.destroy();
     },
     // update (dt) {},

@@ -22,7 +22,7 @@ cc.Class({
     start () {
          //一共多少页
          this.count = this.pageView.getPages().length;        
-         
+         this.startTime = Date.now();
     },
     leftBtn(){
         //取当前页下序号 
@@ -43,6 +43,9 @@ cc.Class({
         }
     },
     closeBtn(){
+        wx.aldSendEvent("答题页_如何玩页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
         this.node.destroy();
     },
     // update (dt) {},

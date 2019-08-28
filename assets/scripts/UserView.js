@@ -40,6 +40,7 @@ cc.Class({
         this.node.destroy();
     },
     shareBtn(){
+        wx.aldSendEvent('分享',{'页面' : '人物升级_炫耀一下'});
         Global.ShareApp();
     },
     /**

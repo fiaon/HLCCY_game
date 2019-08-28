@@ -23,6 +23,9 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('游戏首页_荣耀榜页面访问数');
+        this.startTime = Date.now();
+
         this.display.node.setContentSize(cc.view.getVisibleSize());
         if(CC_WECHATGAME){
             //给子域发送消息
@@ -43,6 +46,9 @@ cc.Class({
         }
     },
     CloseBtn(){
+        wx.aldSendEvent("游戏首页_荣耀榜页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
         this.node.destroy();
     },
     _updaetSubDomainCanvas () {
@@ -64,6 +70,7 @@ cc.Class({
     },
     //分享按钮
     shareBtn(){
+        wx.aldSendEvent('分享',{'页面' : '荣耀榜_分享战绩'});
         Global.ShareApp();
     },
 });

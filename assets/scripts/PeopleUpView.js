@@ -22,6 +22,9 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('游戏首页_时光足迹页面访问数');
+        this.startTime = Date.now();
+
         if(Global.UserLvlData){
             let data =null;
             for(let i=0;i<Global.UserLvlData.length;i++){
@@ -45,7 +48,9 @@ cc.Class({
         }
     },
     CloseBtn(){
-
+        wx.aldSendEvent("游戏首页_时光足迹页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
         this.node.destroy();
     },
     // update (dt) {},

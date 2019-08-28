@@ -13,6 +13,8 @@ window.Global = {
     UserLvlData:null,       //玩家升级职业的数据
     CarLvlData:null,        //车辆信息
     gamedata:null,
+    startTime:null,         //页面停留时长
+    boxnum:null,            //每日宝箱次数
 
 
     Time_Last: 0,                    //切后台时间
@@ -22,6 +24,8 @@ window.Global = {
     ShiWanWhetherSuccess: false,         //是否跳转试玩成功
     shareimg: null,
     banner: null,
+    clip_click:null,
+    clip_click_2:null,
 
     jumpappObject: null,
 
@@ -34,7 +38,6 @@ window.Global = {
     sessionId: null,                                 //sessionid
     app_data:null,                      //第三方进游戏存储数据
     Introuid: 0,                    //用来辨别邀请任务的id
-    Udata:null,
 
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
@@ -45,6 +48,34 @@ window.Global = {
     url_GetCarData:"HLCY/GetCarData",                       //车辆信息
     url_GetUserInfo:"HLCY/GetUserInfo",                     //获取玩家信息
     url_AddPower:"HLCY/AddPower",                           //增加体力
+    url_GetUserData: "game/GetUserData",                         //接口地址
+    url_SetUserData: "game/SetUserData",
+    /**
+     * 获取惊喜宝箱数据
+     */
+    GetUserData(callback) {
+        let parme = {
+            appid: this.appid,
+            sessionId: this.sessionId,
+        };
+        this.Post(this.url_GetUserData, parme,callback);
+    },
+
+    /**
+     * 存储惊喜宝箱数据
+     */
+    SetUserData() {
+        let parme = {
+            appid: this.appid,
+            sessionId: this.sessionId,
+            udata: null,               
+            score:0,
+            lvl:0,
+            ucount:this.boxnum,
+            zcount:0,
+        };
+        this.Post(this.url_SetUserData, parme);
+    },
     //增加体力
     AddPower(num,callback){
         let parme = {
@@ -368,15 +399,18 @@ window.Global = {
     },
     ShareApp(callback) {
         if (CC_WECHATGAME) {
-            // 上线前注释console.log(this.shareimg);
-            wx.shareAppMessage({
+            // 上线前注释console.log(this.shareimg); 
+            // aldShareAppMessage shareAppMessage
+            wx.aldShareAppMessage({
                 title: '被这游戏分分钟虐的怀疑人生，我就问问：还有谁？',
                 imageUrl: this.shareimg,
                 success(res) {
-                    // 上线前注释console.log("yes");
+                    // 上线前注释
+                    console.log("yes");
                 },
                 fail(res) {
-                    // 上线前注释console.log("failed");
+                    // 上线前注释
+                    console.log("failed");
                 },
                 complete(res) {
                     // 上线前注释console.log("complete");

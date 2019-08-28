@@ -22,12 +22,22 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('体力不足弹窗_页面访问数');
+        this.startTime = Date.now();
 
     },
     videoBtn(){
-        //Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this))
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_体力不足_视频领取');
+                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+            }
+        }
     },
     Success(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '体力不足_视频领取_是'});
         this.buzu.active = false;
         this.huode.active = true;
         Global.AddPower(2,(res)=>{
@@ -37,12 +47,23 @@ cc.Class({
         });
     },
     Failed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '体力不足_视频领取_否'});
         Global.ShowTip(this.node, "观看完视频才会有奖励哦");
     },
     CloseBtn(){
+        var curScene = cc.director.getScene().name;
+        if(curScene == "start"){
+            cc.find("Canvas").getComponent("start").UserPower();
+        }
+        wx.aldSendEvent("体力不足弹窗_页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
+        wx.aldSendEvent('体力不足弹窗_关闭按钮');
         this.node.destroy();
     },
     FreeBtn(){
+        wx.aldSendEvent('体力不足弹窗_免费体力');
         let freepowerview = cc.instantiate(this.freeview);
         if(freepowerview){
             this.node.addChild(freepowerview);

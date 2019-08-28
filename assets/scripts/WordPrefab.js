@@ -28,7 +28,7 @@ cc.Class({
             if(indexnum == this.indexnum){
                 this.ziimg.active = true;
                 this.errorimg.active = false;
-                this.word.node.color = new cc.color(255,255,255);
+                this.word.node.color = new cc.color(37,138,202);
             }
         },this);
         cc.game.on("idiomError",function(indexnum){
@@ -51,16 +51,16 @@ cc.Class({
         for(let i=0;i<answer.length;i++){
             if(k ==answer[i]){
                 this.word.string ="";
-                this.node.x = x*68;
-                this.node.y = y*68;
+                this.node.x = x*75;
+                this.node.y = y*75;
                 this.index = i;
                 this.img.active =true;
                 this.node.on("touchstart",this.clickBtn,this);
                 return;
             }else{
                 this.word.string = word;
-                this.node.x = x*68;
-                this.node.y = y*68;
+                this.node.x = x*75;
+                this.node.y = y*75;
             }
         }
 
@@ -85,13 +85,14 @@ cc.Class({
         
         this.selectID = id;
         this.word.string = word;
-        this.word.node.color = new cc.color(255,255,255);
+        this.word.node.color = new cc.color(37,138,202);
         this.selectword = word;
         this.ziimg.active = true;
         return true;
     },
     //点击棋盘上的字的方法(有字就把子下掉，没字就移动光标)
     clickBtn(){
+        cc.audioEngine.play(Global.clip_click_2, false);
         var selectbtn = cc.find("Canvas/qipanbg/9*9/select_img");
         selectbtn.position = this.node.position;
         if(this.word.string!=""){

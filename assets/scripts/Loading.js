@@ -76,7 +76,12 @@ cc.Class({
                     }
                     // Global.Post(url, parme);
                     console.log("登陆参数",parme);
-                    Global.UserLogin(parme,self.loadRemoteAssets());
+                    Global.UserLogin(parme,(res)=>{
+                        if(res.state == 1){
+                            console.log("登陆完成");
+                            self.loadRemoteAssets();
+                        }
+                    });
                     Global.Getinfo();
                     Global.GetJumpInfo();
                     Global.GetUserLvlData();
@@ -84,7 +89,9 @@ cc.Class({
                 }
             });
         }
-        
+        cc.director.preloadScene("start", function () {
+            cc.log("预加载开始scene");
+        });
         //this.loadRemoteAssets();
     },
     /**

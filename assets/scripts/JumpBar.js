@@ -90,6 +90,9 @@ cc.Class({
             this.btn.node.x = 0;
             // 上线前注释console.log("this.node.parent == ", this.node.parent);
             this.zhezhao.active = false;
+            wx.aldSendEvent("游戏首页_收藏夹页面停留时间",{
+                "耗时" : (Date.now()-this.startTime)/1000
+            });
         }
         else {
             this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
@@ -97,6 +100,8 @@ cc.Class({
             this.btn.node.scaleX = -1;
             this.btn.node.x = 19.5;
             this.zhezhao.active = true;
+            //页面停留开始时间
+            this.startTime = Date.now();
         }
         this.hide = !this.hide;
     },

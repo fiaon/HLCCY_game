@@ -64,6 +64,10 @@ cc.Class({
             default:null,
             type:cc.Node,
         },
+        tuijian:{
+            default:null,
+            type:cc.Node,
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -71,7 +75,7 @@ cc.Class({
     // onLoad () {},
     //打乱数组排序
     UpsetArray() {
-        var arr = this.dataArr.answer;
+        var arr = this.oldArr;
         var len = arr.length;
         for (var i = 0; i < len - 1; i++) {
             var index = parseInt(Math.random() * (len - i));
@@ -89,10 +93,40 @@ cc.Class({
         this.map_temp = new Map();
         //保存答案的下标
         this.arr_answer = new Array();
+        if(((Global.level)%3)==0){
+            this.ChaPingGuangGao();
+        }
+    },
+    /**
+     * 插屏广告
+     */
+    ChaPingGuangGao(){
+        if(wx.createInterstitialAd){
+            let interstitialAd = wx.createInterstitialAd({ adUnitId: 'adunit-52b5ac9b2a5638e0' })
+            interstitialAd.onLoad(() => {
+                wx.aldSendEvent('插屏广告',{'监听' : '加载成功'});
+            })
+            if(interstitialAd){
+                interstitialAd.show().catch((err) => {
+                    console.error(err)
+                    if(err){
+                        wx.aldSendEvent('插屏广告',{'监听' : '加载失败'});
+                    }
+                })
+            }
+            interstitialAd.onError((err) => {
+                wx.aldSendEvent('插屏广告',{'监听' : '加载失败'});
+            })
+            interstitialAd.onClose((res) => {
+                wx.aldSendEvent('插屏广告',{'监听' : '关闭'});
+            })
+          }
     },
 
-
     start() {
+        wx.aldSendEvent('答题页_页面访问数');
+        Global.startTime = Date.now();
+
         this.BtnTishiFangSuo();
         this.ChangeJumpAppSelectSprite();
         //给子域发送消息
@@ -111,6 +145,7 @@ cc.Class({
         let data = Global.gamedata;
         console.log(data);
         let _words = data.data.conf.word;
+        this.rightKeywords = _words;
         let _idiom = data.data.conf.idiom;
         let _posx = data.data.conf.posx;
         let _posy = data.data.conf.posy;
@@ -144,8 +179,8 @@ cc.Class({
             }
             this.select = cc.instantiate(this.selectbtn);
             this.selectId = _answer[this.index];
-            this.select.x = _posx[_answer[this.index]] * 68;
-            this.select.y = _posy[_answer[this.index]] * 68;
+            this.select.x = _posx[_answer[this.index]] * 75;
+            this.select.y = _posy[_answer[this.index]] * 75;
             this.qipan.addChild(this.select);
             for (let i = 0; i < _answer.length; i++) {
                 this.oldArr[i] = _answer[i];
@@ -153,10 +188,10 @@ cc.Class({
             }
             //打乱排序
             this.UpsetArray();
-            for (let j = 0; j < this.dataArr.answer.length; j++) {
+            for (let j = 0; j < this.oldArr.length; j++) {
                 let clickword = cc.instantiate(this.clickwordPrefab);
-                let __answer = this.dataArr.answer[j];
-                clickword.getComponent("ClickWordPrefab").init(this.dataArr.answer[j], _words[__answer], _posx[__answer], _posy[__answer]);
+                let __answer = this.oldArr[j];
+                clickword.getComponent("ClickWordPrefab").init(this.oldArr[j], _words[__answer], _posx[__answer], _posy[__answer]);
                 this.clickcontent.addChild(clickword);
             }
         }
@@ -164,7 +199,8 @@ cc.Class({
         //点击下面字的监听 放上去 word_key map中的
         cc.game.on("clickWord", function (id, word) {
             this.loser =null;
-            var _wordPrefab = this.qipan.getChildByName(this.oldArr[this.index].toString()).getComponent("WordPrefab");
+            this.idiom_index=null;
+            var _wordPrefab = this.qipan.getChildByName(this.dataArr.answer[this.index].toString()).getComponent("WordPrefab");
             let x = _posx[this.selectId];
             let y = _posy[this.selectId];
             var word_key = x * 10 + y;
@@ -183,7 +219,7 @@ cc.Class({
                 }
                 else
                     right_word = word;
-                console.log("right :", right_word);
+                //console.log("right :", right_word);
             }
             else
                 return;
@@ -195,10 +231,11 @@ cc.Class({
                 let end_ = new Array();
                 for (let i = 0; i < 9; i++) {
                     let temp_word = i * 10 + y;
-                    if (_index_letters.has(temp_word)) {
+                    let temp_cha = Math.abs(word_key - temp_word);
+                    if (_index_letters.has(temp_word)&& (temp_cha>=0 && temp_cha<=30)) {
                         count_ += 1;
                     }
-                    else {
+                    else { 
                         count_ = 0;
                     }
     
@@ -218,6 +255,9 @@ cc.Class({
                                 if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
                                     bFinish = false;
                                     bRight = false;
+                                    if(this.idiom_index == null){
+                                        this.idiom_index = this.map_answer.get(temp_word);  
+                                    }
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
                                     bRight = false;
@@ -264,7 +304,8 @@ cc.Class({
                 let end_ = new Array();
                 for (let i = 0; i < 9; i++) {
                     let temp_word = x*10 + i;
-                    if (_index_letters.has(temp_word)) {
+                    let temp_cha = Math.abs(word_key - temp_word);
+                    if (_index_letters.has(temp_word)&& (temp_cha>=0 && temp_cha<=3)) {
                         count_ += 1;
                     }
                     else {
@@ -287,6 +328,7 @@ cc.Class({
                                 if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
                                     bFinish = false;
                                     bRight = false;
+                                    this.idiom_index = this.map_answer.get(temp_word);
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
                                     bRight = false;
@@ -328,16 +370,25 @@ cc.Class({
             }
 
             this.haveziArr[this.index] = 1;
-            for (let i = 0; i < this.haveziArr.length; i++) {
-                if (this.haveziArr[i] == 0) {
-                    this.index = i;
-                    break;
+            if(this.idiom_index){
+                for (let i = 0; i < this.dataArr.answer.length; i++) {
+                    if (this.dataArr.answer[i] == this.idiom_index) {
+                        this.index = i;
+                        break;
+                    }
+                }
+            }else{
+                for (let i = 0; i < this.haveziArr.length; i++) {
+                    if (this.haveziArr[i] == 0) {
+                        this.index = i;
+                        break;
+                    }
                 }
             }
-            if (this.oldArr[this.index]) {
-                this.selectId = this.oldArr[this.index];
-                this.select.x = this.dataArr.posx[this.oldArr[this.index]] * 68;
-                this.select.y = this.dataArr.posy[this.oldArr[this.index]] * 68;
+            if (this.dataArr.answer[this.index]) {
+                this.selectId = this.dataArr.answer[this.index];
+                this.select.x = this.dataArr.posx[this.dataArr.answer[this.index]] * 75;
+                this.select.y = this.dataArr.posy[this.dataArr.answer[this.index]] * 75;
             }
             //判断2个map是否都一样（胜利条件）
             let winnum =0;
@@ -374,13 +425,14 @@ cc.Class({
 
             for (let i = 0; i < this.clickcontent.children.length; i++) {
                 if (this.clickcontent.children[i].name == id) {
-                    this.clickcontent.children[i].active = true;
+                    //this.clickcontent.children[i].opacity = 255;
+                    this.clickcontent.children[i].getComponent("ClickWordPrefab").ChangeState();
                 }
             }
 
-            this.selectId = this.oldArr[this.index];
-            this.select.x = this.dataArr.posx[this.oldArr[this.index]] * 68;
-            this.select.y = this.dataArr.posy[this.oldArr[this.index]] * 68;
+            this.selectId = this.dataArr.answer[this.index];
+            this.select.x = this.dataArr.posx[this.dataArr.answer[this.index]] * 75;
+            this.select.y = this.dataArr.posy[this.dataArr.answer[this.index]] * 75;
         }, this);
 
         if(CC_WECHATGAME){
@@ -395,8 +447,8 @@ cc.Class({
             }
             let ranindex =Math.floor( Math.random()*jumpIndexArr.length);
             let game_jump = cc.instantiate(this.game_jumpApp);
-            game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 68;
-            game_jump.y = jumpIndexArr[ranindex]%10 * 68;
+            game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 75 +37;
+            game_jump.y = jumpIndexArr[ranindex]%10 * 75 +37;
             let src = game_jump.getComponent(require("JumpAppScript"));
             let src_index = Math.floor(Math.random()*Global.jumpappObject.length);
             if(src){
@@ -406,22 +458,44 @@ cc.Class({
                 src.sprite.spriteFrame = Global.jumpappObject[src_index].sprite;
             }
             this.qipan.addChild(game_jump);
-        }
 
+            if(Global.level >=30){
+                this.tuijian.active = true;
+                let rantuijian = Math.floor(Math.random()*Global.jumpappObject.length);
+                let _tuijian = this.tuijian.getComponent(require("JumpAppScript"))
+                _tuijian.index = rantuijian;
+                _tuijian.sprite.spriteFrame = Global.jumpappObject[_tuijian.index].sprite;
+            }
+        }
+        cc.director.preloadScene("start", function () {
+            cc.log("预加载开始scene");
+        });
+    },
+    //提示 自动填充一个正确答案
+    OneRightKey(){
+        for (let i = 0; i < this.clickcontent.children.length; i++) {
+            if (this.clickcontent.children[i].name == this.dataArr.answer[this.index]) {
+                this.clickcontent.children[i].active = false;
+            }
+        }
+        cc.game.emit("clickWord",this.dataArr.answer[this.index],this.rightKeywords[this.dataArr.answer[this.index]]);
     },
     BackBtn() {
         cc.director.loadScene("start.fire");
     },
     //如何玩
     guideBtn() {
+        wx.aldSendEvent("答题页_如何玩");
         let guide = cc.instantiate(this.guideview);
         if (guide) {
             this.node.addChild(guide);
         }
     },
-    //分享按钮
+    //提示按钮(点击后进入好友分享页面，分享成功自动填充一个正确答案，分享失败进入15s视频播放页面，播放成功自动填充一个正确答案)
     shareBtn() {
+        wx.aldSendEvent('分享',{'页面' : '答题页_提示'});
         Global.ShareApp();
+        this.OneRightKey();
     },
     /**
      * 分享的放缩
@@ -462,21 +536,13 @@ cc.Class({
      */
     ChangeJumpAppSelectSprite() {
         let sprite = this.gglunbo.getComponent(cc.Sprite);
-        this.gglunbo.index = 0;
+        this.gglunbo.index = Math.floor(Math.random()*3);
         this.gglunbo.on("touchend", this.TouchEnd, this);
-       
-        this.schedule(() => {
-            if (this.gglunbo.index < Global.jumpappObject.length - 1) {
-                this.gglunbo.index++;
-            } else {
-                this.gglunbo.index = 0;
-            }
-            if(Global.jumpappObject[this.gglunbo.index].lunbo!=null){
-                sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].lunbo;
-            }else{
-                sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].sprite;
-            }
-        }, 3.0, cc.macro.REPEAT_FOREVER, 0.1);
+        if(Global.jumpappObject[this.gglunbo.index].lunbo!=null){
+            sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].lunbo;
+        }else{
+            sprite.spriteFrame = Global.jumpappObject[this.gglunbo.index].sprite;
+        }
     },
     TouchEnd(event) {
         event.stopPropagation();

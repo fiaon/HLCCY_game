@@ -1346,7 +1346,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "content",
+    "_name": "content_1",
     "_objFlags": 0,
     "_parent": {
       "__id__": 34

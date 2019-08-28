@@ -41,8 +41,11 @@ cc.Class({
     // onLoad () {},
 
     start () {
+        wx.aldSendEvent('恭喜过关_页面访问数');
+        this.startTime = Date.now();
+
         if(CC_WECHATGAME){
-            //假设我们游戏 有 一个得分和金币数据 需要存在托管数据上
+            //数据存在托管数据上
             var arr = new Array();
             let level = Global.level.toString();
             arr.push({ key: "score", value:level});
@@ -74,11 +77,26 @@ cc.Class({
         }
         if(Global.playerlvl<Global.carlvl){
             let num_lvl = Global.UserLvlData[Global.playerlvl].gamelvl - Global.level;
-            this.lvl_label.string = "还有"+num_lvl+"关后可升级最新人物";
+            if(num_lvl<=0){
+                this.lvl_label.string = "当前可以升级人物";
+            }else{
+                this.lvl_label.string = "还有"+num_lvl+"关后可升级最新人物";
+            }
         }else{
             let num_lvl = Global.CarLvlData[Global.carlvl-1].gamelvl - Global.level;
-            this.lvl_label.string = "还有"+num_lvl+"关后可升级最新车辆";
+            if(num_lvl<=0){
+                this.lvl_label.string = "当前可以升级车辆";
+            }else {
+                this.lvl_label.string = "还有"+num_lvl+"关后可升级最新车辆";
+            }
         }
+
+        cc.director.preloadScene("start", function () {
+            cc.log("预加载开始scene");
+        });
+        cc.director.preloadScene("game", function () {
+            cc.log("预加载开始scene");
+        });
     },
     //倒计时
     doCountdownTime(){
@@ -96,10 +114,17 @@ cc.Class({
         }
     },
     showVideoBtn(){
-        //Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-        this.Success();
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_恭喜过关_视频领取');
+                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+            }
+        }
     },
     Success(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '恭喜过关_视频领取_是'});
         let self = this;
         Global.AddPower(1,(res)=>{
             if(res.state == 1){
@@ -113,31 +138,47 @@ cc.Class({
         });
     },
     Failed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '恭喜过关_视频领取_否'});
         Global.ShowTip(this.node, "观看完视频才会有奖励哦");
     },
     backBtn(){
+        wx.aldSendEvent('恭喜过关_返回主页');
         cc.director.loadScene("start.fire");
     },
     //分享按钮
     shareBtn(){
+        wx.aldSendEvent('分享',{'页面' : '恭喜过关_炫耀一下'});
         Global.ShareApp();
     },
     nextBtn(){
         let self =this;
-        //如果体力够
-        if(Global.power>0){
-            //获取关卡数据
-            Global.GetLvldata(Global.level,(res)=>{
-                if(res.state==1){
-                    Global.power -=1;
-                    Global.gamedata = res.result.data;
-                    cc.director.loadScene("game.fire");
+        wx.aldSendEvent('恭喜过关_下一关');
+        Global.GetUserInfo((res)=>{
+            if(res.state == 1){
+                Global.power = res.result.power;
+                //如果体力够
+                if(Global.power>0){
+                    //获取关卡数据
+                    Global.GetLvldata(Global.level,(res)=>{
+                        if(res.state==1){
+                            Global.power -=1;
+                            Global.gamedata = res.result.data;
+                            wx.aldSendEvent("答题页_页面停留时间",{
+                                "耗时" : (Date.now()-Global.startTime)/1000
+                            });
+                            wx.aldSendEvent("恭喜过关_页面停留时间",{
+                                "耗时" : (Date.now()-this.startTime)/1000
+                            });
+                            cc.director.loadScene("game.fire");
+                        }
+                    });
+                }else{
+                    //Global.ShowTip(this.node,"游戏体力不足，请参与免费体力活动获取");
+                    this.ShowAddPower();
                 }
-            });
-        }else{
-            //Global.ShowTip(this.node,"游戏体力不足，请参与免费体力活动获取");
-            this.ShowAddPower();
-        }
+            }
+        })
     },
     ShowAddPower(){
         let addpower = cc.instantiate(this.prefab_addpower)
