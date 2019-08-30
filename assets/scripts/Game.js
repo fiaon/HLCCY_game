@@ -385,11 +385,11 @@ cc.Class({
                     }
                 }
             }
-            if (this.dataArr.answer[this.index]) {
+            // if (this.dataArr.answer[this.index]) {
                 this.selectId = this.dataArr.answer[this.index];
                 this.select.x = this.dataArr.posx[this.dataArr.answer[this.index]] * 75;
                 this.select.y = this.dataArr.posy[this.dataArr.answer[this.index]] * 75;
-            }
+            // }
             //判断2个map是否都一样（胜利条件）
             let winnum =0;
             for(let i=0;i<this.arr_answer.length;i++){

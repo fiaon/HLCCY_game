@@ -40,8 +40,8 @@ cc.Class({
         this.ShiWanTaskData = null;
         Global.GetMission((res) => {
             // 上线前注释console.log("res == ", res);
-            self.ShiWanTaskData = res.result.pgmission;     //试玩任务数据
-            self.onAddShiWanItemForScrollview
+            self.ShiWanTaskData = res.result;     //试玩任务数据
+            self.onAddShiWanItemForScrollview();
         });
     },
     /**
@@ -49,8 +49,8 @@ cc.Class({
      */
     onAddShiWanItemForScrollview: function () {
         // 上线前注释console.log("添加试玩item----", this.ShiWanTaskData);
-        for (var i = 0; i < this.ShiWanTaskData.list.length; i++) {
-            if (this.ShiWanTaskData.list[i].IsLingQu == 0) {
+        for (var i = 0; i < this.ShiWanTaskData.length; i++) {
+             if (this.ShiWanTaskData[i].isfinish == false) {
                 this.taskShiWan = cc.instantiate(this.TaskShiWanWeiPrefab);
                 var btn_lingqu = this.taskShiWan.getChildByName("btn_lingqu");       //领取按钮
                 var btn_qushiwan = this.taskShiWan.getChildByName("btn_qushiwan");       //去试玩按钮
@@ -58,64 +58,46 @@ cc.Class({
                 if (this.taskShiWan.getChildByName("btn_realBtn")) {
                     this.btn_realBtn = this.taskShiWan.getChildByName("btn_realBtn");
                     this.btn_realBtn.index = i;
-                    this.btn_realBtn.idx = this.ShiWanTaskData.list[i].Id;
-                    this.btn_realBtn.GameAppID = this.ShiWanTaskData.list[i].GameAppID;
+                    this.btn_realBtn.idx = this.ShiWanTaskData[i].id;
+                    this.btn_realBtn.GameAppID = this.ShiWanTaskData[i].AppId;
                 }
 
-                if (this.ShiWanTaskData.list[i].IsComplete == 0) {
+                if (this.ShiWanTaskData[i].isfinish == false) {
                     btn_qushiwan.active = true;
+                    btn_lingqu.active = false;
                     this.btn_realBtn.on('click', this.onClickDemo, this);
                 } else {
-                    if (Global.Time_Cha >= 20 && Global.ShiWanWhetherSuccess == true) {
-                        btn_lingqu.active = true;
-                        this.btn_realBtn.off('click', this.onClickDemo, this);
-                        this.btn_realBtn.on('click', this.onClickGetAward, this);
+                    // if (Global.Time_Cha >= 20 && Global.ShiWanWhetherSuccess == true) {
+                        // btn_qushiwan.active = false;
+                        // btn_lingqu.active = true;
+                        // this.btn_realBtn.off('click', this.onClickDemo, this);
+                        // this.btn_realBtn.on('click', this.onClickGetAward, this);
                         
-                    }
+                    //}
                 }
 
-                if (this.ShiWanTaskData.list[i].TaskNum <= this.ShiWanTaskData.list[i].CompleteNum) {
-                    btn_qushiwan.active = false;
-                    this.btn_realBtn.off('click', this.onClickDemo, this);
-                    this.btn_realBtn.on('click', this.onClickGetAward, this);
-                    Global.Time_Cha = 0;
-                    // 上线前注释console.log("完成任务");
-                } else {
-                    if (Global.ShiwanIndex >= 0 && Global.ShiwanIndex == i && Global.ShiWanWhetherSuccess == true) {
-                        
-                        if (Global.Time_Cha >= 20) {
-                            
-                            btn_qushiwan.active = false;
-                            this.btn_realBtn.off('click', this.onClickDemo, this);
-                            this.btn_realBtn.on('click', this.onClickGetAward, this);
-                            Global.Time_Cha = 0;
-                            
-                        }
-                    }
-                }
-
-            } else {
+             } else {
                 this.taskShiWan = cc.instantiate(this.TaskShiWanYiPrefab);
-            }
+             }
 
             var img_gameIcon = this.taskShiWan.getChildByName("img_gameIcon");
 
             var img_gameIcon_sprite = img_gameIcon.getComponent(cc.Sprite);
             // // 上线前注释console.log("Global.jumpappObject == ", Global.jumpappObject);
-
-            for (let j = 0; j < Global.jumpappObject.length; j++) {
-                if (this.ShiWanTaskData.list[i].GameAppID == Global.jumpappObject[j].apid) {
-                    img_gameIcon_sprite.spriteFrame = Global.jumpappObject[j].sprite;
-                    // img_gameIcon.setScale(76 / 144);    //游戏icon太大需要缩放 
-                }
-            }
             var txt_shiwan = this.taskShiWan.getChildByName("txt_shiwan");       //任务需求
             var txt_shiwan_label = txt_shiwan.getComponent(cc.Label);
-            txt_shiwan_label.string = this.ShiWanTaskData.list[i].Name;
+            
+            for (let j = 0; j < Global.jumpappObject.length; j++) {
+                if (this.ShiWanTaskData[i].AppId == Global.jumpappObject[j].apid) {
+                    img_gameIcon_sprite.spriteFrame = Global.jumpappObject[j].sprite;
+                    // img_gameIcon.setScale(76 / 144);    //游戏icon太大需要缩放 
+                    txt_shiwan_label.string = Global.jumpappObject[i].name;
+                }
+            }
 
-            var txt_jiangli = this.taskShiWan.getChildByName("txt_jiangli");     //任务奖励金币
-            var txt_jiangli_label = txt_jiangli.getComponent(cc.Label);
-            txt_jiangli_label.string = this.ShiWanTaskData.list[i].GiveValue;
+            // var txt_jiangli = this.taskShiWan.getChildByName("txt_jiangli");     //任务奖励金币
+            // var txt_jiangli_label = txt_jiangli.getComponent(cc.Label);
+            // txt_jiangli_label.string = this.ShiWanTaskData[i].GiveValue;
 
             this.content.addChild(this.taskShiWan);
             
@@ -156,49 +138,49 @@ cc.Class({
                 // // 上线前注释console.log("跳转成功", res);
                 Global.ShiWanWhetherSuccess = true;
                 let that = self;
-                // self.scheduleOnce(() => {
-                // 上线前注释console.log("that.appidthat.appidthat.appid==", that.appid, self.appid);
-                // Global.UserActions(1, "试玩任务", that.appid);      //只有在成功的时候才可以请求用户操作接口
+                self.scheduleOnce(() => {
+                // 上线前注释.log("that.appidthat.appidthat.appid==", that.appid, self.appid);
+                Global.UpdateUserMission(that.appid,(res)=>{
+                    if(res.state == 1){
+                        self.onClickGetAward();
+                    }
+                });      //只有在成功的时候才可以请求用户操作接口
                 // Global.AddUserOper(2,that.appid);
-                // }, 55.0)
+                }, 20.0)
             },
             fail(res) {
                 // // 上线前注释console.log("跳转失败", res);
                 Global.ShiWanWhetherSuccess = false;
             },
             complete(res) {
-                // // 上线前注释console.log("跳转结果", res);
+                
             }
         })
        
     },
     /**
-     * 领取奖励按钮
+     * 领取奖励
      */
     onClickGetAward: function (event) {
-        // // 上线前注释console.log("领取奖励", event.target.type_1, event.target.idx, event.target.index);
 
-        this.event_target = event.target;
+        Global.ShowTip(this.node, "试玩成功");
         var self = this;
         //提示
-        Global.ShowTip(this.node, "领取成功");
-        //领取成功之后重新请求任务接口，然后刷新列表
-        Global.GetMission((res) => {
-            
-            self.ShiWanTaskData = res.result.pgmission;     //试玩任务数据
-            //清空列表
-            if (self.content.children.length > 0) {
-                self.content.removeAllChildren();
+        Global.AddPower(2,0,(res)=>{
+            if(res.state == 1){
+                cc.find("Canvas").getComponent("start").UserPower();
             }
-            //添加item
-            self.onAddShiWanItemForScrollview();
-            event.target.off('click', self.onClickGetAward, this);
-            Global.ShiwanIndex = -1;
-            Global.Time_Cha = 0;
-
-            // var listData = null;
-            // listData = self.ShiWanTaskData.list;
-            // Global.UpdateScore(1, listData[self.event_target.index].GiveValue, "任务获得");
+            Global.GetMission((res) => {
+                self.ShiWanTaskData = res.result;     //试玩任务数据
+                //清空列表
+                if (self.content.children.length > 0) {
+                    self.content.removeAllChildren();
+                }
+                //添加item
+                self.onAddShiWanItemForScrollview();
+                Global.ShiwanIndex = -1;
+                Global.Time_Cha = 0;
+            });
         });
     },
     CloseBtn(){

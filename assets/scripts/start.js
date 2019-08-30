@@ -101,7 +101,7 @@ cc.Class({
             self.UserPower();
         }
 
-        //Global.addListener();
+        Global.addListener();
         this.ShowBoxView();
         this.ChangeJumpAppSelectSprite();
         cc.director.preloadScene("game", function () {
@@ -232,14 +232,15 @@ cc.Class({
     },
     //升级车辆
     CarLevelUpBtn(){
-        if (CC_WECHATGAME) {
-            if(wx.createRewardedVideoAd){
-                //看视频成功显示页面TODO
-                wx.aldSendEvent('视频广告');
-                wx.aldSendEvent('视频广告_游戏首页_升级车辆');
-                Global.showAdVedio(this.CarLevelUp.bind(this), this.CarFailed.bind(this));
-            }
-        }
+        // if (CC_WECHATGAME) {
+        //     if(wx.createRewardedVideoAd){
+        //         //看视频成功显示页面TODO
+        //         wx.aldSendEvent('视频广告');
+        //         wx.aldSendEvent('视频广告_游戏首页_升级车辆');
+        //         Global.showAdVedio(this.CarLevelUp.bind(this), this.CarFailed.bind(this));
+        //     }
+        // }
+        this.CarLevelUp();
     },
     CarLevelUp(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
@@ -256,14 +257,15 @@ cc.Class({
     },
     //升级人物
     UserLevelUpBtn(){
-        if (CC_WECHATGAME) {
-            if(wx.createRewardedVideoAd){
-                //看视频成功显示页面TODO
-                wx.aldSendEvent('视频广告');
-                wx.aldSendEvent('视频广告_游戏首页_升级人物');
-                Global.showAdVedio(this.UserLevelUp.bind(this), this.UserFailed.bind(this));
-            }
-        }
+        // if (CC_WECHATGAME) {
+        //     if(wx.createRewardedVideoAd){
+        //         //看视频成功显示页面TODO
+        //         wx.aldSendEvent('视频广告');
+        //         wx.aldSendEvent('视频广告_游戏首页_升级人物');
+        //         Global.showAdVedio(this.UserLevelUp.bind(this), this.UserFailed.bind(this));
+        //     }
+        // }
+        this.UserLevelUp();
     },
     UserLevelUp(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});

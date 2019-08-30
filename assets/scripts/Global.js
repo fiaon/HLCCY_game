@@ -50,6 +50,15 @@ window.Global = {
     url_AddPower:"HLCY/AddPower",                           //增加体力
     url_GetUserData: "game/GetUserData",                         //接口地址
     url_SetUserData: "game/SetUserData",
+    url_UpdateUserMission:"HLCY/UpdateUserMission",
+    UpdateUserMission(jappid,callback){
+        let parme = {
+            sessionid: this.sessionId,
+            appid: this.appid,
+            jappid:jappid,
+        };
+        this.Post(this.url_UpdateUserMission, parme,callback);
+    },
     /**
      * 获取惊喜宝箱数据
      */
@@ -77,10 +86,11 @@ window.Global = {
         this.Post(this.url_SetUserData, parme);
     },
     //增加体力
-    AddPower(num,callback){
+    AddPower(num,id,callback){
         let parme = {
             sessionid:this.sessionId,
             num:num,
+            id:id,
         }
         this.Post(this.url_AddPower,parme,callback);
     },
@@ -117,6 +127,7 @@ window.Global = {
      */
     GetMission(callback) {
         let parme = {
+            appid:this.appid,
             sessionid: this.sessionId,
             // appid: this.appid,
         };
@@ -317,7 +328,8 @@ window.Global = {
     },
 
     GetJumpInfo(callback) { 
-        this.Get("https://wx.zaohegame.com/game/jumpapp?appid=wxfa819a83fa221978", (obj) => {
+        //wxfa819a83fa221978 
+        this.Get("https://wx.zaohegame.com/game/jumpapp?appid=wx4fb5b2de70ef1649", (obj) => {
             if (obj.state == 1) {
                 this.jumpappObject = obj.result;
                 var self = this;

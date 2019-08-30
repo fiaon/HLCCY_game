@@ -114,19 +114,20 @@ cc.Class({
         }
     },
     showVideoBtn(){
-        if (CC_WECHATGAME) {
-            if(wx.createRewardedVideoAd){
-                wx.aldSendEvent('视频广告');
-                wx.aldSendEvent('视频广告_恭喜过关_视频领取');
-                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-            }
-        }
+        // if (CC_WECHATGAME) {
+        //     if(wx.createRewardedVideoAd){
+        //         wx.aldSendEvent('视频广告');
+        //         wx.aldSendEvent('视频广告_恭喜过关_视频领取');
+        //         Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+        //     }
+        // }
+        this.Success();
     },
     Success(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
         wx.aldSendEvent('视频广告',{'是否有效' : '恭喜过关_视频领取_是'});
         let self = this;
-        Global.AddPower(1,(res)=>{
+        Global.AddPower(1,0,(res)=>{
             if(res.state == 1){
                 Global.power +=1;
                 let tip = cc.instantiate(this.tips)

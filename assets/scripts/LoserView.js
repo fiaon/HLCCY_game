@@ -56,13 +56,14 @@ cc.Class({
     },
     //继续按钮 看视频成功之后取消当前的错误成语
     ShowAdVideo(){
-        if (CC_WECHATGAME) {
-            if(wx.createRewardedVideoAd){
-                wx.aldSendEvent('视频广告');
-                wx.aldSendEvent('视频广告_挑战失败_继续');
-                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-            }
-        }
+        // if (CC_WECHATGAME) {
+        //     if(wx.createRewardedVideoAd){
+        //         wx.aldSendEvent('视频广告');
+        //         wx.aldSendEvent('视频广告_挑战失败_继续');
+        //         Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+        //     }
+        // }
+        this.Success();
     },
     Success(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});

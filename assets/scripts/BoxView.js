@@ -31,13 +31,14 @@ cc.Class({
         Global.SetUserData();
     },
     videoBtn(){
-        if (CC_WECHATGAME) {
-            if(wx.createRewardedVideoAd){
-                wx.aldSendEvent('视频广告');
-                wx.aldSendEvent('视频广告_惊喜宝箱_立即领取');
-                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-            }
-        }
+        // if (CC_WECHATGAME) {
+        //     if(wx.createRewardedVideoAd){
+        //         wx.aldSendEvent('视频广告');
+        //         wx.aldSendEvent('视频广告_惊喜宝箱_立即领取');
+        //         Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+        //     }
+        // }
+        this.Success();
     },
     Success(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
@@ -61,7 +62,7 @@ cc.Class({
     },
     powerCloseBtn(){
         //获取体力在关闭页面TODO
-        Global.AddPower(this.powernum,(res)=>{
+        Global.AddPower(this.powernum,0,(res)=>{
             
         });
         cc.find("Canvas").getComponent("start").UserPower();
