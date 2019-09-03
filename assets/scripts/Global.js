@@ -33,8 +33,8 @@ window.Global = {
 
     appid: "wx4fb5b2de70ef1649",
     appSecret: "fe18f16ab7a39971e69767dce7897e7e",
-    //linkUrl: "https://wx.zaohegame.com/",        //域名
-    linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
+    linkUrl: "https://wx.zaohegame.com/",        //域名
+    //linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
     sessionId: null,                                 //sessionid
     app_data:null,                      //第三方进游戏存储数据
     Introuid: 0,                    //用来辨别邀请任务的id

@@ -90,6 +90,7 @@ cc.Class({
         let self = this;
         this.isplaymusic = true;
         cc.audioEngine.playMusic(this.clip_backmusic, true);
+        cc.audioEngine.setMusicVolume(0.8);
         this.power_string = this.powerbg.getChildByName("number").getComponent(cc.Label);
         this.power_max = this.powerbg.getChildByName("max");
         this.power_time = this.powerbg.getChildByName("time");

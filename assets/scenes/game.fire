@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.25056649791839986,
-      "y": 0.25056649791839986,
+      "x": 0.20389805097451288,
+      "y": 0.20389805097451288,
       "z": 1
     },
     "_quat": {
@@ -1664,7 +1664,7 @@
     "_N$startAxis": 0,
     "_N$paddingLeft": 50,
     "_N$paddingRight": 30,
-    "_N$paddingTop": 0,
+    "_N$paddingTop": 15,
     "_N$paddingBottom": 0,
     "_N$spacingX": 10,
     "_N$spacingY": 6,
@@ -1681,7 +1681,7 @@
       "__id__": 2
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 2,
     "_components": [
       {
@@ -1703,7 +1703,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 690,
-      "height": 200
+      "height": 100
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1713,7 +1713,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -567,
+      "y": -617,
       "z": 0
     },
     "_scale": {

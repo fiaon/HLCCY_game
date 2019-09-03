@@ -78,7 +78,6 @@ cc.Class({
                     console.log("登陆参数",parme);
                     Global.UserLogin(parme,(res)=>{
                         if(res.state == 1){
-                            console.log("登陆完成");
                             self.loadRemoteAssets();
                         }
                     });

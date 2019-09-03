@@ -199,7 +199,13 @@ cc.Class({
         //点击下面字的监听 放上去 word_key map中的
         cc.game.on("clickWord", function (id, word) {
             this.loser =null;
-            this.idiom_index=null;
+            let idiom_indexX=null;
+            let idiom_indexY=null;
+            let indexX = 4;
+            let indexY = 4;
+            let map_tempHasX = 0;
+            let map_tempHasY = 0;
+            let wordindex = null;
             var _wordPrefab = this.qipan.getChildByName(this.dataArr.answer[this.index].toString()).getComponent("WordPrefab");
             let x = _posx[this.selectId];
             let y = _posy[this.selectId];
@@ -225,7 +231,7 @@ cc.Class({
                 return;
 
             //判断填写的字所在的位置 含有那些成语
-            {
+            {   
                 let count_ = 0;
                 let start_ = new Array();
                 let end_ = new Array();
@@ -248,15 +254,22 @@ cc.Class({
                     if (end_[e] - start_[e] == 3) {
                         let bFinish = true;
                         let bRight = true;
+                        let temp_num=0; //起始下标
                         //横向的已经找出 判断是否已经填写满，或者是否正确
                         for (let i = start_[e]; i <= end_[e]; i++) {
                             let temp_word = i * 10 + y;
+                            temp_num++;
+                            // 判断我填的字在成语的第几个位置 (用于判断之后的下标的位置) X
+                            if(temp_word == word_key){
+                                indexX = temp_num-1;
+                            }
                             if (this.map_temp.has(temp_word)) {
-                                if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
+                                if (this.map_temp.get(temp_word) == -1) {
                                     bFinish = false;
                                     bRight = false;
-                                    if(this.idiom_index == null){
-                                        this.idiom_index = this.map_answer.get(temp_word);  
+                                    map_tempHasX ++;
+                                    if(idiom_indexX == null){
+                                        idiom_indexX = this.map_answer.get(temp_word);  
                                     }
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
@@ -271,6 +284,17 @@ cc.Class({
                             for(let i = start_[e]; i <= end_[e]; i++){
                                 let temp_word = i * 10 + y;
                                 cc.game.emit("idiomRight",_letters.get(temp_word));
+
+                            }
+                            for(let i = start_[e]; i <= end_[e]; i++){
+                                let temp_word = i * 10 + y;
+                                
+                                let temp = _letters.get(temp_word);
+                                wordindex = this.JudgeWord(_posx[temp],_posy[temp],temp_word,_index_letters);
+                                if(wordindex){
+                                    console.log("wordindex：",wordindex);
+                                    break;
+                                }
                             }
                         }
                         else {
@@ -321,14 +345,21 @@ cc.Class({
                     if (end_[e] - start_[e] == 3) {
                         let bFinish = true;
                         let bRight = true;
-                        //横向的已经找出 判断是否已经填写满，或者是否正确
+                        //纵向的已经找出 判断是否已经填写满，或者是否正确
+                        let temp_num=0; //起始下标
                         for (let i = start_[e]; i <= end_[e]; i++) {
                             let temp_word = x*10 + i;
+                            temp_num++; // 增加
+                            // 判断我填的字在成语的第几个位置 (用于判断之后的下标的位置)
+                            if(temp_word == word_key){
+                                indexY = 4-temp_num; //当前字所在的位置
+                            }
                             if (this.map_temp.has(temp_word)) {
-                                if (this.map_temp.get(temp_word) == -1&&word!=_index_letters.has(temp_word)) {
+                                if (this.map_temp.get(temp_word) == -1) {
                                     bFinish = false;
                                     bRight = false;
-                                    this.idiom_index = this.map_answer.get(temp_word);
+                                    map_tempHasY ++;
+                                    idiom_indexY = this.map_answer.get(temp_word);
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
                                     bRight = false;
@@ -342,6 +373,17 @@ cc.Class({
                             for(let i = start_[e]; i <= end_[e]; i++){
                                 let temp_word = x * 10 + i;
                                 cc.game.emit("idiomRight",_letters.get(temp_word));
+
+                            }
+                            for(let i = start_[e]; i <= end_[e]; i++){
+                                let temp_word = x * 10 + i;
+                                let temp = _letters.get(temp_word);
+                                wordindex = this.JudgeWord(_posx[temp],_posy[temp],temp_word,_index_letters);
+                                if(wordindex){
+                                    console.log("wordindex：",wordindex);
+                                    break;
+                                }
+
                             }
                         }
                         else {
@@ -370,21 +412,78 @@ cc.Class({
             }
 
             this.haveziArr[this.index] = 1;
-            if(this.idiom_index){
-                for (let i = 0; i < this.dataArr.answer.length; i++) {
-                    if (this.dataArr.answer[i] == this.idiom_index) {
-                        this.index = i;
-                        break;
+            // 判断所在字 横的成语位置比竖的成语位置 那个靠前先填那个成语
+            // if(indexX <= indexY){
+                //如果位置相同 比如 玩x不x 和 欺xxx  都是第二个。再按存在字多的来填.也就是需要填字少的
+                // 横着的需要填的字比竖着的少 也就是场上存在的多 或者当前字竖着没有成语
+                if((map_tempHasX <= map_tempHasY || map_tempHasY == 0) && map_tempHasX!=0){
+                    if(idiom_indexX){
+                        for (let i = 0; i < this.dataArr.answer.length; i++) {
+                            if (this.dataArr.answer[i] == idiom_indexX) {
+                                this.index = i;
+                                break;
+                            }
+                        }
+                    }else{
+                        for (let i = 0; i < this.haveziArr.length; i++) {
+                            if (this.haveziArr[i] == 0) {
+                                this.index = i;
+                                break;
+                            }
+                        }
+                    }
+                    // 竖着的需要填的字比竖着的少 也就是场上存在的多 或者当前字横着没有成语
+                }else if( (map_tempHasX > map_tempHasY || map_tempHasX == 0) && map_tempHasY!=0){
+                    if(idiom_indexY){
+                        for (let i = 0; i < this.dataArr.answer.length; i++) {
+                            if (this.dataArr.answer[i] == idiom_indexY) {
+                                this.index = i;
+                                break;
+                            }
+                        }
+                    }else{
+                        for (let i = 0; i < this.haveziArr.length; i++) {
+                            if (this.haveziArr[i] == 0) {
+                                this.index = i;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    //当前完全且正确的成语每个字是否还有连接其他没填完的成语 光标优先去这些成语的位置
+                    if(wordindex){
+                        for (let i = 0; i < this.dataArr.answer.length; i++) {
+                            if (this.dataArr.answer[i] == wordindex) {
+                                this.index = i;
+                                break;
+                            }
+                        }
+                    }else{
+                        for (let i = 0; i < this.haveziArr.length; i++) {
+                            if (this.haveziArr[i] == 0) {
+                                this.index = i;
+                                break;
+                            }
+                        }
                     }
                 }
-            }else{
-                for (let i = 0; i < this.haveziArr.length; i++) {
-                    if (this.haveziArr[i] == 0) {
-                        this.index = i;
-                        break;
-                    }
-                }
-            }
+            // }else{
+            //     if(idiom_indexY){
+            //         for (let i = 0; i < this.dataArr.answer.length; i++) {
+            //             if (this.dataArr.answer[i] == idiom_indexY) {
+            //                 this.index = i;
+            //                 break;
+            //             }
+            //         }
+            //     }else{
+            //         for (let i = 0; i < this.haveziArr.length; i++) {
+            //             if (this.haveziArr[i] == 0) {
+            //                 this.index = i;
+            //                 break;
+            //             }
+            //         }
+            //     }
+            // }
             // if (this.dataArr.answer[this.index]) {
                 this.selectId = this.dataArr.answer[this.index];
                 this.select.x = this.dataArr.posx[this.dataArr.answer[this.index]] * 75;
@@ -470,6 +569,79 @@ cc.Class({
         cc.director.preloadScene("start", function () {
             cc.log("预加载开始scene");
         });
+    },
+    //判断字的横竖是否有成语 
+    JudgeWord(x,y,word_key,_index_letters){
+        let wordindex = null;
+        { 
+            let count_ = 0;
+            let start_ = 0;
+            let end_ = 0;
+            for (let i = 0; i < 9; i++) {
+                let temp_word = i * 10 + y;
+                let temp_cha = Math.abs(word_key - temp_word);
+                if (_index_letters.has(temp_word)&& (temp_cha>=0 && temp_cha<=30)) {
+                    count_ += 1;
+                }
+                else { 
+                    count_ = 0;
+                }
+    
+                if (count_ == 4) {
+                    end_    = i;
+                    start_  = i- 3;
+                }
+            }
+            if (end_ - start_ == 3) {
+                // console.log("横着有成语",start_,end_)
+                //横向的已经找出 判断是否已经填写满，或者是否正确
+                for (let i = start_; i <= end_; i++) {
+                    let temp_word = i * 10 + y;
+                    // console.log("横word",temp_word,this.map_temp);
+                    if (this.map_temp.has(temp_word)) {
+                        if (this.map_temp.get(temp_word) == -1) {
+                            wordindex = this.map_answer.get(temp_word);
+                            // console.log("横着有没填完的",this.map_answer.get(temp_word));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        {
+            let count_ = 0;
+            let start_ = 0;
+            let end_ = 0;
+            for (let i = 0; i < 9; i++) {
+                let temp_word = x*10 + i;
+                let temp_cha = Math.abs(word_key - temp_word);
+                if (_index_letters.has(temp_word)&& (temp_cha>=0 && temp_cha<=3)) {
+                    count_ += 1;
+                }
+                else {
+                    count_ = 0;
+                }
+
+                if (count_ == 4) {
+                    end_   = i;
+                    start_  = i- 3;
+                }
+            }
+            if (end_ - start_ == 3) {
+                // console.log("竖着有成语",start_,end_)
+                for (let i = start_; i <= end_; i++) {
+                    let temp_word = x*10 + i;
+                    // console.log("竖word",temp_word,this.map_temp);
+                    if (this.map_temp.has(temp_word)) {
+                        if (this.map_temp.get(temp_word) == -1) {
+                            wordindex = this.map_answer.get(temp_word);
+                            // console.log("竖着有没填完的",this.map_answer.get(temp_word));
+                        }
+                    }
+                }
+            }
+        }
+        return wordindex;
     },
     //提示 自动填充一个正确答案
     OneRightKey(){
