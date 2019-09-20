@@ -20,13 +20,13 @@ cc.Class({
         labelGame: {
             default: null,
             type: cc.Label,
-        }
+        },
+        index:0,
     },
 
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
-        this.index = 0;
     },
 
     start() {
@@ -54,13 +54,13 @@ cc.Class({
             if(this.node.parent.name == "content"){
                 wx.aldSendEvent('游戏推广_答题页_收藏夹');
             }
-            else if(this.node.parent.parent.parent.name == "LoserView"&&this.node.name == "jumplunboPrefab"){
+            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "LoserView"&&this.node.name == "jumplunboPrefab"){
                 wx.aldSendEvent('游戏推广_答题失败_滚动列表');
             }
-            else if(this.node.parent.parent.parent.name == "WinView"&&this.node.name == "jumplunboPrefab"){
+            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "WinView"&&this.node.name == "jumplunboPrefab"){
                 wx.aldSendEvent('游戏推广_恭喜过关_滚动列表');
             }
-            else if(this.node.parent.parent.parent.name == "GuideView"&&this.node.name == "jumplunboPrefab"){
+            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "GuideView"&&this.node.name == "jumplunboPrefab"){
                 wx.aldSendEvent('游戏推广_如何玩_滚动列表');
             }
             else if(this.node.name == "img_tuijian"){

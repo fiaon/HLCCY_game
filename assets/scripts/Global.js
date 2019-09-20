@@ -4,7 +4,7 @@ window.Global = {
     sex:null,
     power:null,             //体力点数
     nexttime:null,          //下个体力的时间
-    maxpower:5,             //最大体力值
+    maxpower:10,             //最大体力值
     prefab_tip: null,       //提示
     level:null,             //玩家解锁等级
     gamelevel:null,         //游戏关卡等级
@@ -15,8 +15,12 @@ window.Global = {
     gamedata:null,
     startTime:null,         //页面停留时长
     boxnum:null,            //每日宝箱次数
+    ismpday:null,           //公众号标识 false 公众号进来还可以加  true不可以加
+    isteam:null,            //组队标识  false 未组队   true 已组队
+    isgqlogin:null,         //true=在国庆登陆了   false  未登陆
+    isGongZhonghao:null,    //是否从公众号进入
 
-
+    res: null,                                      //res
     Time_Last: 0,                    //切后台时间
     Time_After: 0,                   //切回前台时间
     Time_Cha: 0,                     //前后端切换时间差
@@ -26,6 +30,9 @@ window.Global = {
     banner: null,
     clip_click:null,
     clip_click_2:null,
+    clip_win:null,
+    UserAuthPostCount:0,            //授权次数
+    boxcount:0,                     
 
     jumpappObject: null,
 
@@ -33,15 +40,17 @@ window.Global = {
 
     appid: "wx4fb5b2de70ef1649",
     appSecret: "fe18f16ab7a39971e69767dce7897e7e",
-    linkUrl: "https://wx.zaohegame.com/",        //域名
-    //linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
+    //linkUrl: "https://wx.zaohegame.com/",        //域名
+    linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
     sessionId: null,                                 //sessionid
     app_data:null,                      //第三方进游戏存储数据
-    Introuid: 0,                    //用来辨别邀请任务的id
+    Introuid: 0,                        //用来辨别邀请任务的id
+    otherIntrouid:0,
+    rawData:null,
 
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
-    url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
+    url_GetLvlData:"HLCY/GetLvldata2",                       //获取每关的数据
     url_GetMission: "HLCY/GetUserMission",                  //任务数据
     url_SetUserInfo: "HLCY/SetUserInfo",                    //存储数据
     url_GetUserLvlData:"HLCY/GetUserLvlData",               //等级信息
@@ -51,6 +60,33 @@ window.Global = {
     url_GetUserData: "game/GetUserData",                         //接口地址
     url_SetUserData: "game/SetUserData",
     url_UpdateUserMission:"HLCY/UpdateUserMission",
+    url_AddMpDayPower: "HLCY/AddMpDayPower",                //公众号增加体力 
+    url_AddUserTeam: "HLCY/AddUserTeam",                    //组队
+    url_GetRank :"HLCY/GetRank",                            //排行榜
+    //排行榜
+    GetRank(callback){
+        let parme = {
+            sessionid: this.sessionId,
+        };
+        console.log(this.sessionId);
+        this.Post(this.url_GetRank, parme,callback);
+    },
+    //组队事件
+    AddUserTeam(Introuid){
+        let parme = {
+            sessionid: this.sessionId,
+            Introuid:Introuid,
+        };
+        this.Post(this.url_AddUserTeam, parme);
+    },
+    //公众号领取体力
+    AddMpDayPower(callback){
+        let parme = {
+            sessionid: this.sessionId,
+        };
+        this.Post(this.url_AddMpDayPower, parme,callback);
+    },
+    //
     UpdateUserMission(jappid,callback){
         let parme = {
             sessionid: this.sessionId,
@@ -204,6 +240,7 @@ window.Global = {
      * @param {*} sessionId sessionId
      */
     UserAuthPost(res, sessionId, callback) {
+        Global.UserAuthPostCount++;
         this.sessionId = sessionId;
         this.rawData = res.rawData;
         this.compareSignature = res.signature;
@@ -233,11 +270,14 @@ window.Global = {
         }
         this.Post(this.url_UserAuthV2, parme, (res) => {
             if (res.resultcode == 500) {
-                this.UserAuthPost(this.res, this.sessionId, callback);
+                //this.UserAuthPost(this.res, this.sessionId, callback);
                 console.log("需要重新授权");
             } else {
                 this.Introuid = res.result.uid;
                 console.log("用户人ID == ", this.Introuid);
+                if(callback){
+                    callback();
+                }
             }
         });
     },
@@ -491,10 +531,12 @@ window.Global = {
         if (CC_WECHATGAME) {
             if(wx.createRewardedVideoAd){
                 let videoAd = wx.createRewardedVideoAd({
-                    adUnitId: 'adunit-3dd2f672a153d93a'
+                    adUnitId: 'adunit-3fc85c976b72900e'
                 })
     
-                videoAd.load()
+                videoAd.load(function(){
+                    console.log("拉取视频广告成功");
+                })
                     .then(() => videoAd.show())
                     .catch(err => console.log(err.errMsg));
                 videoAd.offClose();

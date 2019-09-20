@@ -22,6 +22,7 @@ cc.Class({
     start () {
         this.node.on("touchstart", this.onTouchStart, this);
         this.node.on("touchend", this.onTouched, this);
+        this.node.on('touchcancel', this.onEventCancel, this);
         this.isclick = true;
     },
 
@@ -58,6 +59,18 @@ cc.Class({
             self.isclick = true;
         }));
         this.node.runAction(action);
+    },
+    onEventCancel(){
+        if(this.isclick){
+            let self = this;
+            var action = cc.sequence(cc.scaleTo(0.3, 0, 0),cc.callFunc(function(){
+                self.node.opacity  = 0;
+                cc.audioEngine.play(Global.clip_click, false);
+                self.isclick = false;
+            }));
+            this.node.runAction(action);
+            cc.game.emit("clickWord",this.selectID,this.selectword);
+        }
     },
     // update (dt) {},
 });

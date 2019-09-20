@@ -25,6 +25,9 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
+        wx.showShareMenu({
+            withShareTicket: true
+        })
         this.LaunchData = JSON.stringify(wx.getLaunchOptionsSync());
         // // 上线前注释console.log("LaunchData=====", this.LaunchData);
 
@@ -35,16 +38,23 @@ cc.Class({
         // // 上线前注释console.log("sceneValue=====", this.sceneValue);
 
         this.queryValue = this.LaunchData_json.query;
-        // 上线前注释console.log("queryValue===分享ID==", this.queryValue);
+        // 上线前注释
+        console.log("queryValue===分享ID==", this.queryValue);
 
         if (this.queryValue) {
             // // 上线前注释
             if (this.LaunchData_json['query']['introuid']) {
-                Global.Introuid = this.LaunchData_json['query']['introuid'];
+                Global.otherIntrouid = this.LaunchData_json['query']['introuid'];
+                console.log("邀请人id: ",Global.otherIntrouid);
             }
             if(this.LaunchData_json['query']['app_data']){
                 Global.app_data = this.LaunchData_json['query']['app_data'];
                 console.log("ceshi-1",this.LaunchData_json['query']['app_data']);
+            }
+            //公众号进来
+            if(this.LaunchData_json['query']['cykxl']){
+                Global.isGongZhonghao = this.LaunchData_json['query']['cykxl'];
+                console.log("公众号进入");
             }
         }
     },
@@ -63,14 +73,14 @@ cc.Class({
                         parme = {
                             appid: Global.appid,
                             code: self.code,
-                            introuid: Global.Introuid,
+                            introuid: 0,
                             appdata:Global.app_data,
                         };
                     }else{
                         parme = {
                             appid: Global.appid,
                             code: self.code,
-                            introuid: Global.Introuid,
+                            introuid: 0,
                             appdata:"",
                         };
                     }

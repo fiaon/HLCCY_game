@@ -67,7 +67,11 @@ cc.Class({
         tuijian:{
             default:null,
             type:cc.Node,
-        }
+        },
+        ruhewan:{
+            default:null,
+            type:cc.Node,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -75,6 +79,9 @@ cc.Class({
     // onLoad () {},
     //打乱数组排序
     UpsetArray() {
+        if(Global.gamedata.lvl ==1){
+            return;
+        }
         var arr = this.oldArr;
         var len = arr.length;
         for (var i = 0; i < len - 1; i++) {
@@ -93,16 +100,16 @@ cc.Class({
         this.map_temp = new Map();
         //保存答案的下标
         this.arr_answer = new Array();
-        if(((Global.level)%3)==0){
-            this.ChaPingGuangGao();
-        }
+        // if(((Global.level)%3)==0){
+        //     this.ChaPingGuangGao();
+        // }
     },
     /**
      * 插屏广告
      */
     ChaPingGuangGao(){
         if(wx.createInterstitialAd){
-            let interstitialAd = wx.createInterstitialAd({ adUnitId: 'adunit-52b5ac9b2a5638e0' })
+            let interstitialAd = wx.createInterstitialAd({ adUnitId: 'adunit-c7b07499a6b284d2' })
             interstitialAd.onLoad(() => {
                 wx.aldSendEvent('插屏广告',{'监听' : '加载成功'});
             })
@@ -128,7 +135,7 @@ cc.Class({
         Global.startTime = Date.now();
 
         this.BtnTishiFangSuo();
-        this.ChangeJumpAppSelectSprite();
+        //this.ChangeJumpAppSelectSprite();
         //给子域发送消息
         var openDataContext = wx.getOpenDataContext();
         openDataContext.postMessage({
@@ -142,7 +149,7 @@ cc.Class({
         this.index = 0;
         this.loser = null;
         //获取当前关卡数据
-        let data = Global.gamedata;
+        let data = Global.gamedata.data;
         console.log(data);
         let _words = data.data.conf.word;
         this.rightKeywords = _words;
@@ -151,7 +158,7 @@ cc.Class({
         let _posy = data.data.conf.posy;
 
         let _answer = data.data.conf.answer;
-        this.level_label.string = "第"+data.data.lvl+"关";
+        this.level_label.string = "第"+Global.gamedata.lvl+"关";
 
         var _letters = new Map();
         for (let i = 0; i < _words.length; i++) {
@@ -201,8 +208,8 @@ cc.Class({
             this.loser =null;
             let idiom_indexX=null;
             let idiom_indexY=null;
-            let indexX = 4;
-            let indexY = 4;
+            let indexX = 0;
+            let indexY = 0;
             let map_tempHasX = 0;
             let map_tempHasY = 0;
             let wordindex = null;
@@ -260,16 +267,17 @@ cc.Class({
                             let temp_word = i * 10 + y;
                             temp_num++;
                             // 判断我填的字在成语的第几个位置 (用于判断之后的下标的位置) X
-                            if(temp_word == word_key){
-                                indexX = temp_num-1;
-                            }
+                            // if(temp_word == word_key){
+                            //     indexX = temp_num-1;
+                            // }
                             if (this.map_temp.has(temp_word)) {
                                 if (this.map_temp.get(temp_word) == -1) {
                                     bFinish = false;
                                     bRight = false;
                                     map_tempHasX ++;
                                     if(idiom_indexX == null){
-                                        idiom_indexX = this.map_answer.get(temp_word);  
+                                        idiom_indexX = this.map_answer.get(temp_word); 
+                                        indexX = temp_num; 
                                     }
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
@@ -281,18 +289,26 @@ cc.Class({
         
                         if (bRight) {
                             // console.log(`横向 %d,%d is right`, start_[e], end_[e]);
-                            for(let i = start_[e]; i <= end_[e]; i++){
-                                let temp_word = i * 10 + y;
-                                cc.game.emit("idiomRight",_letters.get(temp_word));
+                            // for(let i = start_[e]; i <= end_[e]; i++){
+                            //     let temp_word = i * 10 + y;
 
-                            }
+                            //     cc.game.emit("idiomRight",_letters.get(temp_word));
+                            // }
+                            let k = start_[e]-1;
+                            this.schedule(function() {
+                                k++;
+                                let temp_word = k * 10 + y;
+                                if(_letters.has(temp_word)){
+                                    var word_prefab = this.qipan.getChildByName(_letters.get(temp_word).toString()).getComponent("WordPrefab")
+                                    word_prefab.IdiomRight(_letters.get(temp_word));
+                                }
+                            }, 0.1, 4, 0);
                             for(let i = start_[e]; i <= end_[e]; i++){
                                 let temp_word = i * 10 + y;
-                                
+
                                 let temp = _letters.get(temp_word);
                                 wordindex = this.JudgeWord(_posx[temp],_posy[temp],temp_word,_index_letters);
                                 if(wordindex){
-                                    console.log("wordindex：",wordindex);
                                     break;
                                 }
                             }
@@ -351,15 +367,16 @@ cc.Class({
                             let temp_word = x*10 + i;
                             temp_num++; // 增加
                             // 判断我填的字在成语的第几个位置 (用于判断之后的下标的位置)
-                            if(temp_word == word_key){
-                                indexY = 4-temp_num; //当前字所在的位置
-                            }
+                            // if(temp_word == word_key){
+                            //     indexY = 4-temp_num; //当前字所在的位置
+                            // }
                             if (this.map_temp.has(temp_word)) {
                                 if (this.map_temp.get(temp_word) == -1) {
                                     bFinish = false;
                                     bRight = false;
                                     map_tempHasY ++;
                                     idiom_indexY = this.map_answer.get(temp_word);
+                                    indexY = 5-temp_num;
                                 }
                                 else if (_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]) {
                                     bRight = false;
@@ -370,17 +387,25 @@ cc.Class({
         
                         if (bRight) {
                             //console.log(`纵向 %d,%d is right`, start_[e], end_[e]);
-                            for(let i = start_[e]; i <= end_[e]; i++){
-                                let temp_word = x * 10 + i;
-                                cc.game.emit("idiomRight",_letters.get(temp_word));
+                            // for(let i = start_[e]; i <= end_[e]; i++){
+                            //     let temp_word = x * 10 + i;
 
-                            }
+                            //     cc.game.emit("idiomRight",_letters.get(temp_word));
+                            // }
+                            let k = end_[e]+1;
+                            this.schedule(function() {
+                                k--;
+                                let temp_word = x * 10 + k;
+                                if(_letters.has(temp_word)){
+                                    var word_prefab = this.qipan.getChildByName(_letters.get(temp_word).toString()).getComponent("WordPrefab")
+                                    word_prefab.IdiomRight(_letters.get(temp_word));
+                                }
+                            }, 0.1, 4, 0);
                             for(let i = start_[e]; i <= end_[e]; i++){
                                 let temp_word = x * 10 + i;
                                 let temp = _letters.get(temp_word);
                                 wordindex = this.JudgeWord(_posx[temp],_posy[temp],temp_word,_index_letters);
                                 if(wordindex){
-                                    console.log("wordindex：",wordindex);
                                     break;
                                 }
 
@@ -417,14 +442,31 @@ cc.Class({
                 //如果位置相同 比如 玩x不x 和 欺xxx  都是第二个。再按存在字多的来填.也就是需要填字少的
                 // 横着的需要填的字比竖着的少 也就是场上存在的多 或者当前字竖着没有成语
                 if((map_tempHasX <= map_tempHasY || map_tempHasY == 0) && map_tempHasX!=0){
-                    if(idiom_indexX){
+                    if(idiom_indexX && idiom_indexY){
+                        if(indexX < indexY){
+                            for (let i = 0; i < this.dataArr.answer.length; i++) {
+                                if (this.dataArr.answer[i] == idiom_indexY) {
+                                    this.index = i;
+                                    break;
+                                }
+                            }
+                        }else {
+                            for (let i = 0; i < this.dataArr.answer.length; i++) {
+                                if (this.dataArr.answer[i] == idiom_indexX) {
+                                    this.index = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }else if(idiom_indexX && idiom_indexY == null){
                         for (let i = 0; i < this.dataArr.answer.length; i++) {
                             if (this.dataArr.answer[i] == idiom_indexX) {
                                 this.index = i;
                                 break;
                             }
                         }
-                    }else{
+                    }
+                    else{
                         for (let i = 0; i < this.haveziArr.length; i++) {
                             if (this.haveziArr[i] == 0) {
                                 this.index = i;
@@ -434,14 +476,31 @@ cc.Class({
                     }
                     // 竖着的需要填的字比竖着的少 也就是场上存在的多 或者当前字横着没有成语
                 }else if( (map_tempHasX > map_tempHasY || map_tempHasX == 0) && map_tempHasY!=0){
-                    if(idiom_indexY){
+                    if(idiom_indexY && idiom_indexX == null){
                         for (let i = 0; i < this.dataArr.answer.length; i++) {
                             if (this.dataArr.answer[i] == idiom_indexY) {
                                 this.index = i;
                                 break;
                             }
                         }
-                    }else{
+                    }else if(idiom_indexX && idiom_indexY){
+                        if(indexX <= indexY){
+                            for (let i = 0; i < this.dataArr.answer.length; i++) {
+                                if (this.dataArr.answer[i] == idiom_indexY) {
+                                    this.index = i;
+                                    break;
+                                }
+                            }
+                        }else{
+                            for (let i = 0; i < this.dataArr.answer.length; i++) {
+                                if (this.dataArr.answer[i] == idiom_indexX) {
+                                    this.index = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else{
                         for (let i = 0; i < this.haveziArr.length; i++) {
                             if (this.haveziArr[i] == 0) {
                                 this.index = i;
@@ -560,6 +619,7 @@ cc.Class({
 
             if(Global.level >=30){
                 this.tuijian.active = true;
+                this.ruhewan.active = false;
                 let rantuijian = Math.floor(Math.random()*Global.jumpappObject.length);
                 let _tuijian = this.tuijian.getComponent(require("JumpAppScript"))
                 _tuijian.index = rantuijian;

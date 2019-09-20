@@ -26,11 +26,11 @@ cc.Class({
             default: null,
             type: cc.Sprite
         },
-
-        btnSprite: {
-            default: [],
-            type: cc.SpriteFrame
-        },
+        
+        bg:{
+            default:null,
+            type:cc.Node,
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -42,10 +42,71 @@ cc.Class({
     start() {
         // this.outpos = cc.v2(185, 0);
         // this.hidepos = cc.v2(-353, 0);
-        this.hidepos = this.node.position;
-        this.outpos = cc.v2(this.node.x+this.node.width, this.node.y);
+        // this.hidepos = this.node.position;
+        // this.outpos = cc.v2(this.node.x+this.node.width, this.node.y);
         this.hide = true;
-        // // 上线前注释console.log("start1");
+        // 上线前注释console.log("start1");
+        // if (Global.jumpinfo_callback == null) {
+        //     // 上线前注释console.log("set callback");
+        //     // 上线前注释console.log("11111111111-----");
+        //     Global.jumpinfo_callback = this.JumpCallBack.bind(this);
+        // }
+        // else {
+        //     this.JumpCallBack();
+        // }
+        //this.btn_sprite = this.btn.getComponent(cc.Sprite);
+        //this.giftAnim();
+        this.btn.getComponent(cc.Animation).play('btnclip');
+        this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;
+        this.node.zIndex = cc.macro.MAX_ZINDEX;
+        this.jumpArr_1 = [0,1,2,3,4,5,6,7,8];
+        this.jumpArr_2 = [0,1,2,3,4,5,9,7,6];
+    },
+
+    JumpCallBack() {
+        if (Global.jumpappObject == null)
+            return;
+        this.content.removeAllChildren();
+        let jumarr = [];
+        if(this.hide){
+            this.jumpArr_1.sort(function(){ return 0.5 - Math.random() });
+            jumarr = this.jumpArr_1;
+        }else{
+            this.jumpArr_2.sort(function(){ return 0.5 - Math.random() });
+            jumarr = this.jumpArr_2;
+        }
+        for (let i = 0; i < jumarr.length; i++) {
+            let app = cc.instantiate(this.jumpappPrefab);
+            if (app) {
+                let src = app.getComponent(require("JumpAppScript"));
+                if (src) {
+                    src.index = jumarr[i];
+                }
+                src.sprite.spriteFrame = Global.jumpappObject[jumarr[i]].sprite;
+                if (src.labelGame) {
+                    src.labelGame.string = Global.jumpappObject[jumarr[i]].name;
+                }
+                this.content.addChild(app);
+            }
+        }
+        this.hide = !this.hide;
+    },
+
+    onButtonClick(event) {
+        // // 上线前注释console.log("event== ", event.target);
+
+        // if (this.hide == false) {
+        //     this.node.runAction(cc.moveTo(0.5, this.hidepos).easing(cc.easeBackIn()));
+        //     this.btn_sprite.spriteFrame = this.btnSprite[0];
+        //     // 上线前注释console.log("this.node.parent == ", this.node.parent);
+        //     this.zhezhao.active = false;
+        // }
+        // else {
+        //     this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
+        //     this.btn_sprite.spriteFrame = this.btnSprite[1];
+        //     this.zhezhao.active = true;
+        // }
+        // this.hide = !this.hide;
         // if (Global.jumpinfo_callback == null) {
         //     // 上线前注释console.log("set callback");
         //     // 上线前注释console.log("11111111111-----");
@@ -54,56 +115,20 @@ cc.Class({
         // else {
             this.JumpCallBack();
         // }
-        //this.btn_sprite = this.btn.getComponent(cc.Sprite);
-        this.btn.getComponent(cc.Animation).play('btnclip');
-        //this.giftAnim();
-        this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;
-        this.node.zIndex = cc.macro.MAX_ZINDEX;
+        //页面停留开始时间
+        this.startTime = Date.now();
+
+        this.zhezhao.active = true;
+        this.bg.active =true;
+        this.btn.node.parent.active = false;
     },
-
-    JumpCallBack() {
-        if (Global.jumpappObject == null)
-            return;
-        for (let i = 0; i < Global.jumpappObject.length; i++) {
-            let app = cc.instantiate(this.jumpappPrefab);
-            if (app) {
-                this.content.addChild(app);
-                let src = app.getComponent(require("JumpAppScript"));
-                if (src) {
-                    src.index = i;
-                }
-                src.sprite.spriteFrame = Global.jumpappObject[i].sprite;
-                if (src.labelGame) {
-                    src.labelGame.string = Global.jumpappObject[i].name;
-                }
-            }
-        }
-    },
-
-    onButtonClick(event) {
-        // 上线前注释console.log("event== ", event.target);
-
-        if (this.hide == false) {
-            this.node.runAction(cc.moveTo(0.5, this.hidepos).easing(cc.easeBackIn()));
-            //this.btn_sprite.spriteFrame = this.btnSprite[0];
-            this.btn.node.scaleX = 1;
-            this.btn.node.x = 0;
-            // 上线前注释console.log("this.node.parent == ", this.node.parent);
-            this.zhezhao.active = false;
-            wx.aldSendEvent("游戏首页_收藏夹页面停留时间",{
-                "耗时" : (Date.now()-this.startTime)/1000
-            });
-        }
-        else {
-            this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
-            //this.btn_sprite.spriteFrame = this.btnSprite[1];
-            this.btn.node.scaleX = -1;
-            this.btn.node.x = 19.5;
-            this.zhezhao.active = true;
-            //页面停留开始时间
-            this.startTime = Date.now();
-        }
-        this.hide = !this.hide;
+    btnclose(){
+        this.zhezhao.active = false;
+        this.bg.active =false;
+        this.btn.node.parent.active = true;
+        wx.aldSendEvent("游戏首页_收藏夹页面停留时间",{
+            "耗时" : (Date.now()-this.startTime)/1000
+        });
     },
     //动画
     giftAnim() {
@@ -112,8 +137,8 @@ cc.Class({
         
         self.giftAnim = cc.repeatForever(
             cc.sequence(
-                cc.skewTo(0.5,-20,20),
-                cc.skewTo(0.5,20,-20)
+                cc.skewTo(0.5,-10,10),
+                cc.skewTo(0.5,10,-10)
             )
         )
         this.gift.runAction(self.giftAnim);

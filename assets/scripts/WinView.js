@@ -44,6 +44,9 @@ cc.Class({
         wx.aldSendEvent('恭喜过关_页面访问数');
         this.startTime = Date.now();
 
+        this.isclicknext = true;
+
+        cc.audioEngine.play(Global.clip_win, false);
         if(CC_WECHATGAME){
             //数据存在托管数据上
             var arr = new Array();
@@ -63,12 +66,12 @@ cc.Class({
             }
             });
         }
-        if(((Global.level+1)%3)==0){
-            this.btn_video.active = true;
-            this._time = 5;
-            this.time_label.string = "("+this._time +"s)";
-            this.schedule(this.doCountdownTime,1);
-        }
+        // if(((Global.level+1)%3)==0){
+        //     this.btn_video.active = true;
+        //     this._time = 5;
+        //     this.time_label.string = "("+this._time +"s)";
+        //     this.schedule(this.doCountdownTime,1);
+        // }
         if(Global.playerlvl&&Global.level>=Global.UserLvlData[Global.playerlvl].gamelvl){
             this.backstart.active =true;
         }
@@ -99,29 +102,28 @@ cc.Class({
         });
     },
     //倒计时
-    doCountdownTime(){
-        //每秒更新显示信息
-        if (this._time > 0 ) {
-            this._time -= 1;
-            this.time_label.string = "("+this._time +"s)";
-            this.countDownShow(this._time);
-        }
-    },
-    countDownShow(temp){
-        if(temp<=0){
-            this.unschedule(this.doCountdownTime);
-            this.btn_video.active = false;
-        }
-    },
+    // doCountdownTime(){
+    //     //每秒更新显示信息
+    //     if (this._time > 0 ) {
+    //         this._time -= 1;
+    //         this.time_label.string = "("+this._time +"s)";
+    //         this.countDownShow(this._time);
+    //     }
+    // },
+    // countDownShow(temp){
+    //     if(temp<=0){
+    //         this.unschedule(this.doCountdownTime);
+    //         this.btn_video.active = false;
+    //     }
+    // },
     showVideoBtn(){
-        // if (CC_WECHATGAME) {
-        //     if(wx.createRewardedVideoAd){
-        //         wx.aldSendEvent('视频广告');
-        //         wx.aldSendEvent('视频广告_恭喜过关_视频领取');
-        //         Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-        //     }
-        // }
-        this.Success();
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_恭喜过关_视频领取');
+                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+            }
+        }
     },
     Success(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
@@ -153,33 +155,38 @@ cc.Class({
         Global.ShareApp();
     },
     nextBtn(){
-        let self =this;
-        wx.aldSendEvent('恭喜过关_下一关');
-        Global.GetUserInfo((res)=>{
-            if(res.state == 1){
-                Global.power = res.result.power;
-                //如果体力够
-                if(Global.power>0){
-                    //获取关卡数据
-                    Global.GetLvldata(Global.level,(res)=>{
-                        if(res.state==1){
-                            Global.power -=1;
-                            Global.gamedata = res.result.data;
-                            wx.aldSendEvent("答题页_页面停留时间",{
-                                "耗时" : (Date.now()-Global.startTime)/1000
-                            });
-                            wx.aldSendEvent("恭喜过关_页面停留时间",{
-                                "耗时" : (Date.now()-this.startTime)/1000
-                            });
-                            cc.director.loadScene("game.fire");
-                        }
-                    });
-                }else{
-                    //Global.ShowTip(this.node,"游戏体力不足，请参与免费体力活动获取");
-                    this.ShowAddPower();
+        if(this.isclicknext){
+            this.isclicknext = false;
+            let self =this;
+            wx.aldSendEvent('恭喜过关_下一关');
+            Global.GetUserInfo((res)=>{
+                if(res.state == 1){
+                    Global.power = res.result.power;
+                    //如果体力够
+                    if(Global.power>0){
+                        //获取关卡数据
+                        Global.GetLvldata(Global.level,(res)=>{
+                            if(res.state==1){
+                                Global.power -=1;
+                                Global.gamedata = res.result;
+                                wx.aldSendEvent("答题页_页面停留时间",{
+                                    "耗时" : (Date.now()-Global.startTime)/1000
+                                });
+                                wx.aldSendEvent("恭喜过关_页面停留时间",{
+                                    "耗时" : (Date.now()-this.startTime)/1000
+                                });
+                                cc.director.loadScene("game.fire");
+                            }else{
+                                this.isclicknext = true;
+                            }
+                        });
+                    }else{
+                        this.ShowAddPower();
+                        this.isclicknext = true;
+                    }
                 }
-            }
-        })
+            })
+        }
     },
     ShowAddPower(){
         let addpower = cc.instantiate(this.prefab_addpower)

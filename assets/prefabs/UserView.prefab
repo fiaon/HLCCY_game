@@ -1278,6 +1278,35 @@
     "title_label": {
       "__id__": 15
     },
+    "userlvlsprite": [
+      {
+        "__uuid__": "96d1b9cd-eb65-4282-8ae9-76029bce263f"
+      },
+      {
+        "__uuid__": "eac37281-0fe4-4d8c-be0a-eb7fedf25219"
+      },
+      {
+        "__uuid__": "fa0ccacd-72e4-445c-9488-c5f46d70286a"
+      },
+      {
+        "__uuid__": "5bcedca0-4e36-472c-8752-b9a427143f9d"
+      },
+      {
+        "__uuid__": "7a067b8d-ad14-4bbe-b45b-2a2c4c22d068"
+      },
+      {
+        "__uuid__": "deba4656-2739-4f7e-b7fd-3781cff6268b"
+      },
+      {
+        "__uuid__": "62f4a091-a93f-462c-b3b4-b5bb9e07811c"
+      },
+      {
+        "__uuid__": "7bc1a935-acb0-4d26-8e7c-f828a5aaa749"
+      },
+      {
+        "__uuid__": "972de952-0a49-4190-9a03-7dbec65b7bc2"
+      }
+    ],
     "_id": ""
   },
   {

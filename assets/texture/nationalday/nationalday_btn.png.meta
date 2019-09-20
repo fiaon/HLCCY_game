@@ -1,0 +1,31 @@
+{
+  "ver": "2.2.0",
+  "uuid": "b9e846c3-9749-4a5b-9c44-2fc30c263368",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "subMetas": {
+    "nationalday_btn": {
+      "ver": "1.0.3",
+      "uuid": "192df811-2147-4e3f-8fed-830fbfb82f9a",
+      "rawTextureUuid": "b9e846c3-9749-4a5b-9c44-2fc30c263368",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 1,
+      "trimY": 0,
+      "width": 124,
+      "height": 154,
+      "rawWidth": 126,
+      "rawHeight": 154,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

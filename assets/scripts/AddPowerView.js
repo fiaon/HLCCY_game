@@ -27,14 +27,13 @@ cc.Class({
 
     },
     videoBtn(){
-        // if (CC_WECHATGAME) {
-        //     if(wx.createRewardedVideoAd){
-        //         wx.aldSendEvent('视频广告');
-        //         wx.aldSendEvent('视频广告_体力不足_视频领取');
-        //         Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
-        //     }
-        // }
-        this.Success();
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_体力不足_视频领取');
+                Global.showAdVedio(this.Success.bind(this), this.Failed.bind(this));
+            }
+        }
     },
     Success(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});

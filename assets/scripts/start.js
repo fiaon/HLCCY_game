@@ -44,6 +44,10 @@ cc.Class({
             default:null,
             type:cc.Prefab,
         },
+        prefab_nationaldat:{
+            default: null,
+            type: cc.Prefab,
+        },
         clip_backmusic: {
             default: null,
             type: cc.AudioClip,
@@ -53,6 +57,10 @@ cc.Class({
             type:cc.AudioClip,
         },
         clip_click_2:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_win:{
             default:null,
             type:cc.AudioClip,
         },
@@ -77,6 +85,26 @@ cc.Class({
             default: [],
             type: cc.Node,
         },
+        userlvlsprite:{
+            default:[],
+            type: cc.SpriteFrame,
+        },
+        carlvlsprite:{
+            default:[],
+            type: cc.SpriteFrame,
+        },
+        power_prefab:{
+            default:null,
+            type:cc.Prefab,
+        },
+        btn_guoqing:{
+            default:null,
+            type:cc.Node,
+        },
+        prefab_gongzhonghao:{
+            default:null,
+            type:cc.Prefab,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -87,24 +115,69 @@ cc.Class({
         wx.aldSendEvent('游戏首页_页面访问数');
         this.startTime = Date.now();
 
+        var date = new Date();
+        let gqtime = date.toLocaleDateString()
+        var arr_gqtime = gqtime.split("/");
+        console.log("当前日期",arr_gqtime);
+        // if(gqtime === "2019/10/9"){
+        //     //国庆活动结束显示弹窗
+        //     this.btn_guoqing.active = true;
+        // }
+
         let self = this;
         this.isplaymusic = true;
-        cc.audioEngine.playMusic(this.clip_backmusic, true);
-        cc.audioEngine.setMusicVolume(0.8);
+        this.isOK = false;
+        if(this.clip_backmusic){
+            cc.audioEngine.playMusic(this.clip_backmusic, true);
+            cc.audioEngine.setMusicVolume(0.6);
+        }
         this.power_string = this.powerbg.getChildByName("number").getComponent(cc.Label);
         this.power_max = this.powerbg.getChildByName("max");
         this.power_time = this.powerbg.getChildByName("time");
         Global.prefab_tip = this.prefab_tips;
         Global.clip_click = this.clip_click;
         Global.clip_click_2 = this.clip_click_2;
+        Global.clip_win = this.clip_win;
 
         if (CC_WECHATGAME) {
             self.UserPower();
         }
 
         Global.addListener();
-        this.ShowBoxView();
+        //this.ShowBoxView();
         this.ChangeJumpAppSelectSprite();
+
+        //判断如果玩家授权过。就调用一下我们自己的授权(因为授权成功之后是不会再出现的)
+        wx.getSetting({
+            success: function (res) {
+                var authSetting = res.authSetting;
+                if (authSetting['scope.userInfo'] === true) {
+                    if (Global.UserAuthPostCount == 0) {
+                        wx.getUserInfo({
+                            success(res){
+                                Global.UserAuthPost(res, Global.sessionId);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        //第一关时新手引导
+        // Global.gamedata = {data:{"data":
+        //                         {"lvl":1,"conf":{"id":1,
+        //                         "word":["独","一","心","一","意","无","接","二","连","三"],
+        //                         "idiom":["独一无二","一心一意","接二连三"],
+        //                         "posx":[4,2,3,4,5,4,3,4,5,6],
+        //                         "posy":[5,4,4,4,4,3,2,2,2,2],
+        //                         "answer":[3,7,9],
+        //                         "barrier":[]}},
+        //                         "errcode":0,
+        //                         "errmsg":""
+        //                     },
+        //                     lvl:1
+        //                 }
+        //cc.director.loadScene("game.fire");
+
         cc.director.preloadScene("game", function () {
             cc.log("预加载开始scene");
         });
@@ -124,22 +197,26 @@ cc.Class({
         let self = this;
         Global.GetUserInfo((res)=>{
             if(res.state == 1){
+                this.isOK =true;
                 Global.power = res.result.power;
                 Global.level = res.result.lvl;
-                if(Global.level ==1){
-                    Global.level =2;
+
+                Global.isgqlogin = res.result.isgqlogin;
+                Global.ismpday = res.result.ismpday;
+                Global.isteam = res.result.isteam;
+                
+                if(Global.ismpday ==false &&Global.isGongZhonghao){
+                    let powerview = cc.instantiate(self.power_prefab);
+                    self.node.addChild(powerview);
                 }
+
                 Global.playerlvl = res.result.playerlvl;
                 Global.carlvl = res.result.carlvl;
                 this.player_name.string = Global.UserLvlData[Global.playerlvl-1].name.trim();
-                let url_player ="user_"+Global.playerlvl+'.png';
-                cc.loader.loadRes(url_player, cc.SpriteFrame, function (err, spriteFrame) {
-                    self.player_img.spriteFrame = spriteFrame;
-                });
-                let url_car ="car_"+Global.carlvl+'.png';
-                cc.loader.loadRes(url_car, cc.SpriteFrame, function (err, spriteFrame) {
-                    self.car_img.spriteFrame = spriteFrame;
-                });
+
+                self.player_img.spriteFrame = this.userlvlsprite[Global.playerlvl-1];
+                self.car_img.spriteFrame =  this.carlvlsprite[Global.carlvl-1];
+                
                 //显示升级按钮
                 if(Global.playerlvl&&Global.level>=Global.UserLvlData[Global.playerlvl].gamelvl){
                     self.lvlup_player.active =true;
@@ -210,6 +287,15 @@ cc.Class({
     shareBtn(){
         wx.aldSendEvent('分享',{'页面' : '游戏游戏_分享好友'});
         Global.ShareApp();
+
+    },
+    //分享按钮
+    nationaldayBtn(){
+        let gzh = cc.instantiate(this.prefab_gongzhonghao);
+        if(gzh){
+            this.node.addChild(gzh);
+        }
+
     },
     //排行榜
     rankBtn(){
@@ -233,15 +319,14 @@ cc.Class({
     },
     //升级车辆
     CarLevelUpBtn(){
-        // if (CC_WECHATGAME) {
-        //     if(wx.createRewardedVideoAd){
-        //         //看视频成功显示页面TODO
-        //         wx.aldSendEvent('视频广告');
-        //         wx.aldSendEvent('视频广告_游戏首页_升级车辆');
-        //         Global.showAdVedio(this.CarLevelUp.bind(this), this.CarFailed.bind(this));
-        //     }
-        // }
-        this.CarLevelUp();
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                //看视频成功显示页面TODO
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_游戏首页_升级车辆');
+                Global.showAdVedio(this.CarLevelUp.bind(this), this.CarFailed.bind(this));
+            }
+        }
     },
     CarLevelUp(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
@@ -258,15 +343,14 @@ cc.Class({
     },
     //升级人物
     UserLevelUpBtn(){
-        // if (CC_WECHATGAME) {
-        //     if(wx.createRewardedVideoAd){
-        //         //看视频成功显示页面TODO
-        //         wx.aldSendEvent('视频广告');
-        //         wx.aldSendEvent('视频广告_游戏首页_升级人物');
-        //         Global.showAdVedio(this.UserLevelUp.bind(this), this.UserFailed.bind(this));
-        //     }
-        // }
-        this.UserLevelUp();
+        if (CC_WECHATGAME) {
+            if(wx.createRewardedVideoAd){
+                //看视频成功显示页面TODO
+                wx.aldSendEvent('视频广告');
+                wx.aldSendEvent('视频广告_游戏首页_升级人物');
+                Global.showAdVedio(this.UserLevelUp.bind(this), this.UserFailed.bind(this));
+            }
+        }
     },
     UserLevelUp(){
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
@@ -290,61 +374,76 @@ cc.Class({
     },
     //宝箱
     ShowBoxView(){
-        Global.GetUserData((res)=>{
-            if(res.state == 1){
-                Global.boxnum = res.result.ucount;
-                if(Global.boxnum >5){
-                    let probability = Math.floor(Math.random() * 10);
-                    if(probability<=8){
-                        let boxview = cc.instantiate(this.prefab_boxview);
-                        if(boxview){
-                            this.node.addChild(boxview);
+        if(Global.boxcount != 0){
+            Global.GetUserData((res)=>{
+                if(res.state == 1){
+                    Global.boxnum = res.result.ucount;
+                    if(Global.boxnum >5){
+                        let probability = Math.floor(Math.random() * 10);
+                        if(probability<=3){
+                            let boxview = cc.instantiate(this.prefab_boxview);
+                            if(boxview){
+                                this.node.addChild(boxview);
+                            }
                         }
                     }
                 }
-            }
-        })
+            })
+        }else{
+            Global.boxcount++;
+        }
     },
     //开始游戏
     PlayerBtn(){
-        let self =this;
-        wx.aldSendEvent('游戏首页_答题升级');
-        //如果体力够
-        if(Global.power>0){
-            //如果体力是满的
-            if(Global.power == Global.maxpower){
-                self.power_max.active = false;
-                self.power_time.active = true;
-                self._time = 310;
-                self.schedule(self.doCountdownTime,1);
+        if(this.isOK){
+            this.isOK = false;
+            let self =this;
+            wx.aldSendEvent('游戏首页_答题升级');
+            //如果体力够
+            if(Global.power>0){
+                //如果体力是满的
+                if(Global.power == Global.maxpower){
+                    self.power_max.active = false;
+                    self.power_time.active = true;
+                    self._time = 310;
+                    self.schedule(self.doCountdownTime,1);
+                }
+                Global.power -=1;
+                self.power_string.string = Global.power;
+                //动画
+                cc.tween(this.anim_target)
+                .to(1, { position: cc.v2(this.anim_pos.x, this.anim_pos.y)})
+                .call(() => {
+                    //获取关卡数据
+                    Global.GetLvldata(Global.level,(res)=>{
+                        if(res.state==1){
+                            Global.gamedata = res.result;
+                            cc.director.loadScene("game.fire");
+                            wx.aldSendEvent("游戏首页_页面停留时间",{
+                                "耗时" : (Date.now()-this.startTime)/1000
+                            });
+                        }else{
+                            this.isOK = true;
+                        }
+                    });
+                })
+                .start()
+            }else{
+                this.ShowAddPower();
+                this.isOK = true;
             }
-            Global.power -=1;
-            self.power_string.string = Global.power;
-            //动画
-            cc.tween(this.anim_target)
-            .to(1, { position: cc.v2(this.anim_pos.x, this.anim_pos.y)})
-            .call(() => {
-                //获取关卡数据
-                Global.GetLvldata(Global.level,(res)=>{
-                    if(res.state==1){
-                        Global.gamedata = res.result.data;
-                        cc.director.loadScene("game.fire");
-                        wx.aldSendEvent("游戏首页_页面停留时间",{
-                            "耗时" : (Date.now()-this.startTime)/1000
-                        });
-                    }
-                });
-            })
-            .start()
-        }else{
-            //Global.ShowTip(this.node,"游戏体力不足，请参与免费体力活动获取");
-            this.ShowAddPower();
         }
     },
     ShowAddPower(){
         let addpower = cc.instantiate(this.prefab_addpower)
         if(addpower){
             this.node.addChild(addpower);
+        }
+    },
+    ShowNationaldat(){
+        let nationaldat = cc.instantiate(this.prefab_nationaldat)
+        if(nationaldat){
+            this.node.addChild(nationaldat);
         }
     },
     /**
@@ -357,7 +456,7 @@ cc.Class({
             let temp = sprite.getComponent(cc.Sprite);
             Arr_jumpApp_Sprite.push(temp);
             this.jumpAppPrefab[i].index = i;
-            this.jumpAppPrefab[i].on("touchend", this.TouchEnd, this);
+            this.jumpAppPrefab[i].on("touchend",this.TouchEnd,this);
             this.JumpAppFangSuo(this.jumpAppPrefab[i]);
         }
         this.schedule(() => {

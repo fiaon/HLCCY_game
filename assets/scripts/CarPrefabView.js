@@ -14,6 +14,10 @@ cc.Class({
     properties: {
         sharebtn:cc.Node,
         carimg:cc.Sprite,
+        carlvlsprite:{
+            default:[],
+            type: cc.SpriteFrame,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -24,10 +28,9 @@ cc.Class({
         this.ShareBtnFangSuo();
         let self = this;
         Global.carlvl++;
-        let url_car ="car_"+Global.carlvl+'.png';
-        cc.loader.loadRes(url_car, cc.SpriteFrame, function (err, spriteFrame) {
-            self.carimg.spriteFrame = spriteFrame;
-        });
+
+        self.carimg.spriteFrame = this.carlvlsprite[Global.carlvl-1];
+
         Global.SetUserInfo();
     },
     init(){

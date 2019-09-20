@@ -24,13 +24,14 @@ cc.Class({
 
     start () {
         this.word_index = -1;
-        cc.game.on("idiomRight",function(indexnum){
-            if(indexnum == this.indexnum){
-                this.ziimg.active = true;
-                this.errorimg.active = false;
-                this.word.node.color = new cc.color(37,138,202);
-            }
-        },this);
+        // cc.game.on("idiomRight",function(indexnum){
+        //     if(indexnum == this.indexnum){
+        //         this.ziimg.active = true;
+        //         this.errorimg.active = false;
+        //         this.word.node.color = new cc.color(37,138,202);
+        //         this.AnimAction();
+        //     }
+        // },this);
         cc.game.on("idiomError",function(indexnum){
             if(indexnum == this.indexnum){
                 // this.ziimg.active = false;
@@ -105,5 +106,21 @@ cc.Class({
         //selectword 用来删除棋盘上的字 index光标的下标 id:用来显示下面的字
         cc.game.emit("showWord",this.index,this.selectID,this.word_index);
     },
+    //动画
+    AnimAction(){
+        var action = cc.sequence(
+            cc.scaleTo(0.1, 1.2, 1.2),
+            cc.scaleTo(0.1, 1, 1),
+        );
+        this.node.runAction(action);
+    },
+    IdiomRight(indexnum){
+        if(indexnum == this.indexnum){
+            this.ziimg.active = true;
+            this.errorimg.active = false;
+            this.word.node.color = new cc.color(37,138,202);
+            this.AnimAction();
+        }
+    }
     // update (dt) {},
 });

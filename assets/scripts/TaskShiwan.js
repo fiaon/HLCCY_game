@@ -25,6 +25,10 @@ cc.Class({
         content:{
             default:null,
             type:cc.Node,
+        },
+        tanchuang:{
+            default:null,
+            type:cc.Node,
         }
     },
 
@@ -43,6 +47,10 @@ cc.Class({
             self.ShiWanTaskData = res.result;     //试玩任务数据
             self.onAddShiWanItemForScrollview();
         });
+        if(Global.ismpday){
+            //公众号即可领取改成已领取
+            
+        }
     },
     /**
      * 添加试玩Item的方法
@@ -188,6 +196,12 @@ cc.Class({
             "耗时" : (Date.now()-this.startTime)/1000
         });
         this.node.destroy();
+    },
+    OpenTanChuang(){
+        this.tanchuang.active = true;
+    },
+    CloseTanChuang(){
+        this.tanchuang.active = false;
     },
     // update (dt) {},
 });

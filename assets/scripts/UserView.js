@@ -15,6 +15,10 @@ cc.Class({
         sharebtn:cc.Node,
         player_img:cc.Sprite,
         title_label:cc.Label,
+        userlvlsprite:{
+            default:[],
+            type: cc.SpriteFrame,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -25,10 +29,8 @@ cc.Class({
         this.ShareBtnFangSuo();
         let self = this;
         Global.playerlvl++;
-        let url_player ="user_"+Global.playerlvl+'.png';
-        cc.loader.loadRes(url_player, cc.SpriteFrame, function (err, spriteFrame) {
-            self.player_img.spriteFrame = spriteFrame;
-        });
+        self.player_img.spriteFrame = this.userlvlsprite[Global.playerlvl-1];
+
         this.title_label.string = "恭喜升级到"+Global.UserLvlData[Global.playerlvl-1].name.trim();
         Global.SetUserInfo();
     },
