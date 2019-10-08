@@ -22,12 +22,15 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        wx.aldSendEvent('体力不足弹窗_页面访问数');
+        wx.aldSendEvent('体力不足弹窗pv');
         this.startTime = Date.now();
 
     },
     videoBtn(){
         if (CC_WECHATGAME) {
+            if(Global.isplaymusic){
+                cc.audioEngine.play(Global.clip_btnclick, false);
+            }
             if(wx.createRewardedVideoAd){
                 wx.aldSendEvent('视频广告');
                 wx.aldSendEvent('视频广告_体力不足_视频领取');
@@ -36,15 +39,23 @@ cc.Class({
         }
     },
     Success(){
+        let self = this;
         wx.aldSendEvent('视频广告',{'是否有效' : '是'});
         wx.aldSendEvent('视频广告',{'是否有效' : '体力不足_视频领取_是'});
         this.buzu.active = false;
         this.huode.active = true;
-        Global.AddPower(2,0,(res)=>{
-            if(res.state == 1){
-                Global.power +=2;
+        var curScene = cc.director.getScene().name;
+        if(curScene == "game"){
+            if(this.node.parent.name == "WinView"){
+                Global.AddPower(2,0,(res)=>{
+                    self.node.parent.getComponent("WinView").UserPower();
+                });
             }
-        });
+        }else{
+            Global.AddPower(2,0,(res)=>{
+                cc.find("Canvas").getComponent("start").UserPower();
+            });
+        }
     },
     Failed(){
         wx.aldSendEvent('视频广告',{'是否有效' : '否'});
@@ -52,17 +63,26 @@ cc.Class({
         Global.ShowTip(this.node, "观看完视频才会有奖励哦");
     },
     CloseBtn(){
-        var curScene = cc.director.getScene().name;
-        if(curScene == "start"){
-            cc.find("Canvas").getComponent("start").UserPower();
-        }
+        // var curScene = cc.director.getScene().name;
+        // if(curScene == "start"){
+        //     cc.find("Canvas").getComponent("start").UserPower();
+        // }
         wx.aldSendEvent("体力不足弹窗_页面停留时间",{
             "耗时" : (Date.now()-this.startTime)/1000
         });
         wx.aldSendEvent('体力不足弹窗_关闭按钮');
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.node.destroy();
     },
     FreeBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         wx.aldSendEvent('体力不足弹窗_免费体力');
         let freepowerview = cc.instantiate(this.freeview);
         if(freepowerview){

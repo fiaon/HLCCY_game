@@ -25,6 +25,9 @@ cc.Class({
          this.startTime = Date.now();
     },
     leftBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         //取当前页下序号 
         let index = this.pageView.getCurrentPageIndex();
         if(index>0){
@@ -34,6 +37,9 @@ cc.Class({
         }
     },
     rightBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         //取当前页下序号 
         let index = this.pageView.getCurrentPageIndex();
         if(index<this.count){
@@ -46,6 +52,9 @@ cc.Class({
         wx.aldSendEvent("答题页_如何玩页面停留时间",{
             "耗时" : (Date.now()-this.startTime)/1000
         });
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.node.destroy();
     },
     // update (dt) {},

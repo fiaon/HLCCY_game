@@ -34,11 +34,11 @@ cc.Class({
         // },this);
         cc.game.on("idiomError",function(indexnum){
             if(indexnum == this.indexnum){
-                // this.ziimg.active = false;
-                // this.errorimg.active = true;
-                // this.word.node.color = new cc.color(255,0,0);
-                // this.word.string = "";
-                this.clickBtn();
+                this.ziimg.active = false;
+                //this.errorimg.active = true;
+                this.word.node.color = new cc.color(255,0,0);
+                //this.word.string = "";
+                //this.clickBtn();
             }
         },this);
     },
@@ -76,9 +76,6 @@ cc.Class({
     //显示点击的字
     showWord(id,word){
         //如果这里有字就互换,没字就显示
-        // if(this.word.string!=""){
-        //     cc.game.emit("showWord",this.selectword,this.index,this.selectID);
-        // }
         if (this.word.string == word)
         {
             return false;
@@ -93,7 +90,9 @@ cc.Class({
     },
     //点击棋盘上的字的方法(有字就把子下掉，没字就移动光标)
     clickBtn(){
-        cc.audioEngine.play(Global.clip_click_2, false);
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_click_2, false);
+        }
         var selectbtn = cc.find("Canvas/qipanbg/9*9/select_img");
         selectbtn.position = this.node.position;
         if(this.word.string!=""){

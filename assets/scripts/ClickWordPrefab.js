@@ -43,10 +43,12 @@ cc.Class({
     onTouched(){
         if(this.isclick){
             let self = this;
+            self.isclick = false;
             var action = cc.sequence(cc.scaleTo(0.3, 0, 0),cc.callFunc(function(){
                 self.node.opacity  = 0;
-                cc.audioEngine.play(Global.clip_click, false);
-                self.isclick = false;
+                if(Global.isplaymusic){
+                    cc.audioEngine.play(Global.clip_click, false);
+                }
             }));
             this.node.runAction(action);
             cc.game.emit("clickWord",this.selectID,this.selectword);
@@ -63,10 +65,12 @@ cc.Class({
     onEventCancel(){
         if(this.isclick){
             let self = this;
+            self.isclick = false;
             var action = cc.sequence(cc.scaleTo(0.3, 0, 0),cc.callFunc(function(){
                 self.node.opacity  = 0;
-                cc.audioEngine.play(Global.clip_click, false);
-                self.isclick = false;
+                if(Global.isplaymusic){
+                    cc.audioEngine.play(Global.clip_click, false);
+                }
             }));
             this.node.runAction(action);
             cc.game.emit("clickWord",this.selectID,this.selectword);

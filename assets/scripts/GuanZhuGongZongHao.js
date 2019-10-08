@@ -19,7 +19,14 @@ cc.Class({
         bg_hj:{
             default:null,
             type:cc.Node,
-        }
+        },
+        rank:cc.Label,
+        avatarImg_1Sprite:cc.Sprite,
+        avatarImg_2Sprite:cc.Sprite,
+        duiyou:cc.Node,
+        me_node:cc.Node,
+        nickLabel:cc.Label,
+        nickLabel_2:cc.Label,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -28,9 +35,49 @@ cc.Class({
 
     start () {
         //TODO 判断是否获奖来显示页面
+        if(Global.userrank.rank<=100){
+            wx.aldSendEvent('获奖提示1页面pv');
+            this.bg_hj.active = true;
+            this.bg_gzh.active = false;
+            //TODO 给获奖页面赋值
+            this.rank.string = Global.userrank.rank;
+            if(Global.userrank.users.length == 2){
+                let avatarUrl = Global.userrank.users[0].headurl;
+                this.createImage(avatarUrl);
+                
+                let headurl = Global.userrank.users[1].headurl;
+                if(headurl){
+                    this.createImage2(headurl);
+                }
+                Global.userrank.users[0].nick = Global.userrank.users[0].nick.substr(0,1);
+                if(Global.userrank.users[1].nick){
+                    Global.userrank.users[1].nick = Global.userrank.users[1].nick.substr(0,1);
+                }else{
+                    Global.userrank.users[1].nick = "游";
+                }
+                this.nickLabel_2.string = this.nickLabel.string = Global.userrank.users[0].nick+Global.userrank.users[1].nick+"战队";
+            }else{
+                this.duiyou.active = false;
+                this.me_node.x=0;
+                let avatarUrl = Global.userrank.users[0].headurl;
+                this.createImage(avatarUrl);
+                if(Global.userrank.users[0].nick.length>6){
+                    Global.userrank.users[0].nick = Global.userrank.users[0].nick.substr(0,6);
+                }
+                this.nickLabel_2.string =  this.nickLabel.string = Global.userrank.users[0].nick;
+            }
+        }else{
+            this.bg_hj.active = false;
+            this.bg_gzh.active = true;
+            wx.aldSendEvent('获奖提示2页面pv');
+        }
     },
     //关注公众号
     GuangZhuBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
+        wx.aldSendEvent('点击关注公众号');
         //点击关注公众号
         var realurl = 'https://img.zaohegame.com/staticfile/wx039e71b55cba9869/hlcy_share.png';
         var urls = [];
@@ -48,6 +95,10 @@ cc.Class({
     },
     //拷贝客服信息
     CopyBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
+        wx.aldSendEvent('复制微信客服号');
         wx.setClipboardData({
                 data: "zuishuaiyouxikefu", //公众号id
                 success: function(res) {
@@ -61,6 +112,10 @@ cc.Class({
     },
     //保存图片
     onSavePhotoBtnClick: function () {
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
+        wx.aldSendEvent('保存图片分享朋友圈');
         //CC_WECHATGAME
         if (cc.sys.browserType == cc.sys.BROWSER_TYPE_WECHAT_GAME) {
             this.photo = null;
@@ -163,11 +218,37 @@ cc.Class({
     },
     //关闭获奖页面
     CloseHuoJieView(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.bg_gzh.active = true;
         this.bg_hj.active = false;
+        wx.aldSendEvent('获奖提示1页面pv');
     },
     CloseBtn(){
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.node.destroy();
+    },
+    createImage(avatarUrl) {
+        let self = this;
+        cc.loader.load({url:avatarUrl +"?aaa=aa.jpg", type: 'jpg'},function(err, texture){
+            if(texture){ 
+                self.avatarImg_1Sprite.spriteFrame = new cc.SpriteFrame(texture);
+            }
+        });
+    },
+    createImage2(avatarUrl) {
+        let self = this;
+        cc.loader.load({url:avatarUrl +"?aaa=aa.jpg", type: 'jpg'},function(err, texture){
+            if(texture){ 
+                self.avatarImg_2Sprite.spriteFrame = new cc.SpriteFrame(texture);
+            }
+        });
     },
     // update (dt) {},
 });

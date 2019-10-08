@@ -14,6 +14,7 @@ cc.Class({
     properties: {
         labelname:cc.Label,
         guanqia:cc.Label,
+        shadow:cc.Sprite,
     },
 
     // LIFE-CYCLE CALLBACKS:

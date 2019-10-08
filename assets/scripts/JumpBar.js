@@ -27,10 +27,11 @@ cc.Class({
             type: cc.Sprite
         },
         
-        bg:{
-            default:null,
-            type:cc.Node,
-        }
+        btnSprite:{
+            default:[],
+            type:cc.SpriteFrame,
+        },
+
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -42,9 +43,13 @@ cc.Class({
     start() {
         // this.outpos = cc.v2(185, 0);
         // this.hidepos = cc.v2(-353, 0);
-        // this.hidepos = this.node.position;
-        // this.outpos = cc.v2(this.node.x+this.node.width, this.node.y);
+        this.hidepos = this.node.position;
+        this.outpos = cc.v2(this.node.x+this.node.width, this.node.y);
         this.hide = true;
+        this.ischage = false;
+
+        this.jumpArr_1 = [0,1,2,3,4];
+        this.jumpArr_2 = [5,6,7,8,9];
         // 上线前注释console.log("start1");
         // if (Global.jumpinfo_callback == null) {
         //     // 上线前注释console.log("set callback");
@@ -52,30 +57,42 @@ cc.Class({
         //     Global.jumpinfo_callback = this.JumpCallBack.bind(this);
         // }
         // else {
-        //     this.JumpCallBack();
+            this.JumpCallBack();
         // }
-        //this.btn_sprite = this.btn.getComponent(cc.Sprite);
-        //this.giftAnim();
-        this.btn.getComponent(cc.Animation).play('btnclip');
-        this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;
-        this.node.zIndex = cc.macro.MAX_ZINDEX;
-        this.jumpArr_1 = [0,1,2,3,4,5,6,7,8];
-        this.jumpArr_2 = [0,1,2,3,4,5,9,7,6];
+        this.btn_sprite = this.btn.getComponent(cc.Sprite);
+        // this.btn.getComponent(cc.Animation).play('btnclip');
+        // this.zhezhao.zIndex = cc.macro.MAX_ZINDEX-1;
+        // this.node.zIndex = cc.macro.MAX_ZINDEX;
+        
     },
-
-    JumpCallBack() {
-        if (Global.jumpappObject == null)
-            return;
-        this.content.removeAllChildren();
-        let jumarr = [];
-        if(this.hide){
-            this.jumpArr_1.sort(function(){ return 0.5 - Math.random() });
-            jumarr = this.jumpArr_1;
-        }else{
-            this.jumpArr_2.sort(function(){ return 0.5 - Math.random() });
-            jumarr = this.jumpArr_2;
+    //洗牌算法
+    shuffle(array) {
+        var m = array.length,
+          t, i;
+        // 如果还剩有元素…
+        while (m) {
+          // 随机选取一个元素…
+          i = Math.floor(Math.random() * m--);
+          // 与当前元素进行交换
+          t = array[m];
+          array[m] = array[i];
+          array[i] = t;
         }
-        for (let i = 0; i < jumarr.length; i++) {
+        return array;
+    },
+    JumpCallBack() {
+        if (Global.jumpappObject == null){
+            return;
+        }
+        let jumarr = [];
+        let temp_arr =[];
+        for(let i=0;i<Global.jumpappObject.length;i++){
+            temp_arr[i] = i;
+        }
+        jumarr = this.shuffle(temp_arr);
+        // console.log("随机数组",jumarr);
+
+        for (let i = 0; i < 5; i++) {
             let app = cc.instantiate(this.jumpappPrefab);
             if (app) {
                 let src = app.getComponent(require("JumpAppScript"));
@@ -89,38 +106,49 @@ cc.Class({
                 this.content.addChild(app);
             }
         }
-        this.hide = !this.hide;
     },
 
     onButtonClick(event) {
         // // 上线前注释console.log("event== ", event.target);
 
-        // if (this.hide == false) {
-        //     this.node.runAction(cc.moveTo(0.5, this.hidepos).easing(cc.easeBackIn()));
-        //     this.btn_sprite.spriteFrame = this.btnSprite[0];
-        //     // 上线前注释console.log("this.node.parent == ", this.node.parent);
-        //     this.zhezhao.active = false;
-        // }
-        // else {
-        //     this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
-        //     this.btn_sprite.spriteFrame = this.btnSprite[1];
-        //     this.zhezhao.active = true;
-        // }
-        // this.hide = !this.hide;
+        if (this.hide == false) {
+            this.node.runAction(cc.moveTo(0.5, this.hidepos).easing(cc.easeBackIn()));
+            this.btn_sprite.spriteFrame = this.btnSprite[0];
+            // 上线前注释console.log("this.node.parent == ", this.node.parent);
+            this.zhezhao.active = false;
+            if(Global.level>=10){
+                Global.showGameLoop = true;
+            }
+            if(Global.isplaymusic){
+                cc.audioEngine.play(Global.clip_btnclose, false);
+            }
+            this.unschedule(this.QieHuanJumpApp);
+        }
+        else {
+            if(Global.isplaymusic){
+                cc.audioEngine.play(Global.clip_btnclick, false);
+            }
+            this.node.runAction(cc.moveTo(0.5, this.outpos).easing(cc.easeBackOut()));
+            this.btn_sprite.spriteFrame = this.btnSprite[1];
+            this.zhezhao.active = true;
+            Global.showGameLoop =false;
+            this.schedule(this.QieHuanJumpApp,5);
+        }
+        this.hide = !this.hide;
         // if (Global.jumpinfo_callback == null) {
         //     // 上线前注释console.log("set callback");
         //     // 上线前注释console.log("11111111111-----");
         //     Global.jumpinfo_callback = this.JumpCallBack.bind(this);
         // }
         // else {
-            this.JumpCallBack();
+        //    this.JumpCallBack();
         // }
-        //页面停留开始时间
-        this.startTime = Date.now();
+        // //页面停留开始时间
+        // this.startTime = Date.now();
 
-        this.zhezhao.active = true;
-        this.bg.active =true;
-        this.btn.node.parent.active = false;
+        // this.zhezhao.active = true;
+        // this.bg.active =true;
+        // this.btn.node.parent.active = false;
     },
     btnclose(){
         this.zhezhao.active = false;
@@ -130,22 +158,42 @@ cc.Class({
             "耗时" : (Date.now()-this.startTime)/1000
         });
     },
-    //动画
-    giftAnim() {
-        var self = this;
-        this.gift = this.btn.node;
+    QieHuanJumpApp(){
+        if (Global.jumpappObject == null)
+        return;
+        this.content.removeAllChildren();
+        // let jumarr = [];
+        // if(this.ischage){
+        //     this.jumpArr_1.sort(function(){ return 0.5 - Math.random() });
+        //     jumarr = this.jumpArr_1;
+        // }else{
+        //     this.jumpArr_2.sort(function(){ return 0.5 - Math.random() });
+        //     jumarr = this.jumpArr_2;
+        // }
         
-        self.giftAnim = cc.repeatForever(
-            cc.sequence(
-                cc.skewTo(0.5,-10,10),
-                cc.skewTo(0.5,10,-10)
-            )
-        )
-        this.gift.runAction(self.giftAnim);
-    },
-    stopGiftAnim() {
-        this.gift.stopAction(self.giftAnim);
-        this.gift.rotation =0;
+        // jumarr.sort(function(){ return 0.5 - Math.random() });
+        let jumarr = [];
+        let temp_arr =[];
+        for(let i=0;i<Global.jumpappObject.length;i++){
+            temp_arr[i] = i;
+        }
+        jumarr = this.shuffle(temp_arr);
+
+        for (let i = 0; i < 5; i++) {
+            let app = cc.instantiate(this.jumpappPrefab);
+            if (app) {
+                let src = app.getComponent(require("JumpAppScript"));
+                if (src) {
+                    src.index = jumarr[i];
+                }
+                src.sprite.spriteFrame = Global.jumpappObject[jumarr[i]].sprite;
+                if (src.labelGame) {
+                    src.labelGame.string = Global.jumpappObject[jumarr[i]].name;
+                }
+                this.content.addChild(app);
+            }
+        }
+        // this.ischage = !this.ischage;
     },
     // update (dt) {},
 });

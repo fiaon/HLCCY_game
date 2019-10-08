@@ -18,6 +18,10 @@ cc.Class({
             default:[],
             type: cc.SpriteFrame,
         },
+        guanggao:{
+            default:[],
+            type:cc.Node,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -32,15 +36,32 @@ cc.Class({
         self.carimg.spriteFrame = this.carlvlsprite[Global.carlvl-1];
 
         Global.SetUserInfo();
+
+        for(let i =0;i<this.guanggao.length;i++){
+            let src = this.guanggao[i].getComponent(require("JumpAppScript"));
+            if (src) {
+                src.index = i;
+            }
+            src.sprite.spriteFrame = Global.jumpappObject[i].sprite;
+        }
     },
     init(){
 
     },
     closeBtn(){
         cc.find("Canvas").getComponent("start").UserPower();
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.node.destroy();
     },
     shareBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         wx.aldSendEvent('分享',{'页面' : '车辆升级_炫耀一下'});
         Global.ShareApp();
     },

@@ -29,7 +29,11 @@ cc.Class({
         tanchuang:{
             default:null,
             type:cc.Node,
-        }
+        },
+        btn_sprite:{
+            default:null,
+            type:cc.Node,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -37,7 +41,7 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        wx.aldSendEvent('游戏首页_免费体力页面访问数');
+        wx.aldSendEvent('免费体力pv');
         this.startTime = Date.now();
 
         let self = this;
@@ -49,7 +53,7 @@ cc.Class({
         });
         if(Global.ismpday){
             //公众号即可领取改成已领取
-            
+            this.btn_sprite.active = true;
         }
     },
     /**
@@ -60,7 +64,7 @@ cc.Class({
         for (var i = 0; i < this.ShiWanTaskData.length; i++) {
              if (this.ShiWanTaskData[i].isfinish == false) {
                 this.taskShiWan = cc.instantiate(this.TaskShiWanWeiPrefab);
-                var btn_lingqu = this.taskShiWan.getChildByName("btn_lingqu");       //领取按钮
+                // var btn_lingqu = this.taskShiWan.getChildByName("btn_lingqu");       //领取按钮
                 var btn_qushiwan = this.taskShiWan.getChildByName("btn_qushiwan");       //去试玩按钮
 
                 if (this.taskShiWan.getChildByName("btn_realBtn")) {
@@ -72,7 +76,7 @@ cc.Class({
 
                 if (this.ShiWanTaskData[i].isfinish == false) {
                     btn_qushiwan.active = true;
-                    btn_lingqu.active = false;
+                    // btn_lingqu.active = false;
                     this.btn_realBtn.on('click', this.onClickDemo, this);
                 } else {
                     // if (Global.Time_Cha >= 20 && Global.ShiWanWhetherSuccess == true) {
@@ -115,12 +119,14 @@ cc.Class({
      * 去试玩按钮方法
      */
     onClickDemo: function (event) {
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         Global.ShiwanIndex = event.target.index;
         this.appid = event.target.GameAppID;
         Global.ShiWanAppid = this.appid;
         // // 上线前注释console.log("this.appid ==", this.appid);
-        wx.aldSendEvent('游戏推广');
-        wx.aldSendEvent('游戏推广_免费体力_试玩列表');
+        wx.aldSendEvent('导流广告_小游戏广告');
 
         for (let i = 0; i < Global.jumpappObject.length; i++) {
             if (this.appid == Global.jumpappObject[i].apid) {
@@ -143,6 +149,7 @@ cc.Class({
             envVersion: 'release',
             success(res) {
                 // 打开成功
+                wx.aldSendEvent('试玩游戏_是否成功_是');
                 // // 上线前注释console.log("跳转成功", res);
                 Global.ShiWanWhetherSuccess = true;
                 let that = self;
@@ -157,6 +164,7 @@ cc.Class({
                 }, 20.0)
             },
             fail(res) {
+                wx.aldSendEvent('试玩游戏_是否成功_否');
                 // // 上线前注释console.log("跳转失败", res);
                 Global.ShiWanWhetherSuccess = false;
             },
@@ -195,9 +203,16 @@ cc.Class({
         wx.aldSendEvent("游戏首页_免费体力页面停留时间",{
             "耗时" : (Date.now()-this.startTime)/1000
         });
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         this.node.destroy();
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
     },
     OpenTanChuang(){
+        wx.aldSendEvent('免费体力_即刻领取');
         this.tanchuang.active = true;
     },
     CloseTanChuang(){

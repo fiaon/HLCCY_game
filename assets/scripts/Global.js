@@ -19,6 +19,8 @@ window.Global = {
     isteam:null,            //组队标识  false 未组队   true 已组队
     isgqlogin:null,         //true=在国庆登陆了   false  未登陆
     isGongZhonghao:null,    //是否从公众号进入
+    isdaylogin:null,        //当天是否登录
+    userrank:null,          //玩家排行榜数据
 
     res: null,                                      //res
     Time_Last: 0,                    //切后台时间
@@ -31,26 +33,36 @@ window.Global = {
     clip_click:null,
     clip_click_2:null,
     clip_win:null,
-    UserAuthPostCount:0,            //授权次数
-    boxcount:0,                     
+    clip_btnclick:null,
+    clip_btnclose:null,
+    UserAuthPostCount:0,            //授权次数   
+    isplaymusic:true,               //是否开启音效              
 
     jumpappObject: null,
 
     jumpinfo_callback: null,
+    GuangGaoIndex: 0,                           //试玩广告index（需要切换界面就切换的）
 
     appid: "wx4fb5b2de70ef1649",
     appSecret: "fe18f16ab7a39971e69767dce7897e7e",
-    //linkUrl: "https://wx.zaohegame.com/",        //域名
-    linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
+    linkUrl: "https://wx.zaohegame.com/",        //域名
+    //linkUrl: "http://wx.zaohegame.com:8099/",        //测试域名
     sessionId: null,                                 //sessionid
     app_data:null,                      //第三方进游戏存储数据
-    Introuid: 0,                        //用来辨别邀请任务的id
+    Introuid:0,                        //用来辨别邀请任务的id
     otherIntrouid:0,
     rawData:null,
+    TheGameLoop: null,                          //游戏圈
+    showGameLoop:false,
+    isshowad:null,                      //false不可屏蔽  true 可屏蔽
+    isshowshare:false,                  //是用户操作了关闭操作传true
+    tips:null,                          //提示次数
+    ysid:null,
+    dayplaycount:null,
 
     url_UserLoginV2: "game/UserLoginV2",
     url_UserAuthV2: "game/UserAuthV2", 
-    url_GetLvlData:"HLCY/GetLvldata2",                       //获取每关的数据
+    url_GetLvlData:"HLCY/GetLvldata",                       //获取每关的数据
     url_GetMission: "HLCY/GetUserMission",                  //任务数据
     url_SetUserInfo: "HLCY/SetUserInfo",                    //存储数据
     url_GetUserLvlData:"HLCY/GetUserLvlData",               //等级信息
@@ -63,6 +75,37 @@ window.Global = {
     url_AddMpDayPower: "HLCY/AddMpDayPower",                //公众号增加体力 
     url_AddUserTeam: "HLCY/AddUserTeam",                    //组队
     url_GetRank :"HLCY/GetRank",                            //排行榜
+    url_GetServerTime:"/game/GetServerTime",                //获取时间的接口
+    url_AddGameLog:"HLCY/AddGameLog",                       //结算接口
+
+    //结算接口
+    AddGameLog(times,tips,sharetips,lvl,callback){
+        let parme = {
+            sessionid: this.sessionId,
+            times:times,                //(时长秒)
+            tips:tips,                  //(使用了邀请提示次数)
+            sharetips:sharetips,        //(使用了分享提示次数)
+            lvl:lvl,
+        };
+        console.log("parme",parme);
+        this.Post(this.url_AddGameLog, parme,callback);
+    },
+    //获取广告下表
+    GetGuangGaoIndex() {
+        if (this.jumpappObject) {
+            if (this.GuangGaoIndex >= this.jumpappObject.length) {
+                this.GuangGaoIndex = 0;
+            } else {
+                this.GuangGaoIndex++;
+            }
+        }
+        return this.GuangGaoIndex;
+    },
+    
+    //获取时间接口
+    GetServerTime(callback){
+        this.Post(this.url_GetServerTime, null,callback);
+    },
     //排行榜
     GetRank(callback){
         let parme = {
@@ -154,7 +197,7 @@ window.Global = {
             sessionid: this.sessionId,
             carlvl: this.carlvl,               
             playerlvl:this.playerlvl,
-            lvl: this.level,
+            isshowshare:this.isshowshare,
         };
         this.Post(this.url_SetUserInfo, parme);
     },
@@ -201,7 +244,12 @@ window.Global = {
                 if (res.query.test) {
                     that.test = res.query.test;
                     that.ShareID = res.query.id;
-                    
+
+                    // if (that.TheGameLoop != null) {
+                    //     that.clubButton = that.TheGameLoop;
+                    //     that.clubButton.style.left = -40;
+                    //     that.clubButton.style.top = -40;
+                    // }
                 }
                 if (that.Time_Last != null && that.Time_After != null) {
                     that.Time_Cha = (that.Time_After - that.Time_Last) / 1000;
@@ -228,6 +276,9 @@ window.Global = {
         // 上线前注释console.log("parme =登录= ", parme);
         this.Post(this.url_UserLoginV2, parme, (res) => {
             self.sessionId = res.result.sessionid;
+            if(self.otherIntrouid != 0){
+                Global.AddUserTeam(Global.otherIntrouid);
+            }
             if(callback){
                 callback(res);
             }
@@ -363,6 +414,12 @@ window.Global = {
         this.Get("https://wx.zaohegame.com/game/shareimg?appid=wx4fb5b2de70ef1649", (obj) => {
             if (obj.state == 1) {
                 this.shareimg = obj.result;
+                wx.aldOnShareAppMessage(function(){
+                    return {
+                      imageUrl : self.shareimg, //转发显示图片的链接
+                      title    : '你忘记了我们当初的海誓山盟了吗？点击一起赢取千元红包大奖', //转发标题
+                    }
+                })
             }
         });
     },

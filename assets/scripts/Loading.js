@@ -20,6 +20,30 @@ cc.Class({
             default:null,
             type:cc.Label,
         },
+        clip_click:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_click_2:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_win:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        prefab_tips:{
+            default: null,
+            type: cc.Prefab,
+        },
+        clip_btnclick:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_btnclose:{
+            default:null,
+            type:cc.AudioClip,
+        },
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -42,10 +66,10 @@ cc.Class({
         console.log("queryValue===分享ID==", this.queryValue);
 
         if (this.queryValue) {
-            // // 上线前注释
+            // // 上线前注释 //邀请得提示
             if (this.LaunchData_json['query']['introuid']) {
-                Global.otherIntrouid = this.LaunchData_json['query']['introuid'];
-                console.log("邀请人id: ",Global.otherIntrouid);
+                Global.introuid = this.LaunchData_json['query']['introuid'];
+                console.log("邀请得提示: ",Global.introuid);
             }
             if(this.LaunchData_json['query']['app_data']){
                 Global.app_data = this.LaunchData_json['query']['app_data'];
@@ -56,11 +80,23 @@ cc.Class({
                 Global.isGongZhonghao = this.LaunchData_json['query']['cykxl'];
                 console.log("公众号进入");
             }
+            if (this.LaunchData_json['query']['team']) {
+                Global.otherIntrouid = this.LaunchData_json['query']['team'];
+                console.log("组队邀请: ",Global.otherIntrouid);
+            }
         }
     },
 
     start () {
         this.progressBar.progress = 0;
+
+        Global.clip_click = this.clip_click;
+        Global.clip_click_2 = this.clip_click_2;
+        Global.clip_win = this.clip_win;
+        Global.clip_btnclick = this.clip_btnclick;
+        Global.clip_btnclose = this.clip_btnclose;
+        
+        Global.prefab_tip = this.prefab_tips;
         if (CC_WECHATGAME) {
             var self = this;
             wx.login({
@@ -73,14 +109,14 @@ cc.Class({
                         parme = {
                             appid: Global.appid,
                             code: self.code,
-                            introuid: 0,
+                            introuid: Global.Introuid,
                             appdata:Global.app_data,
                         };
                     }else{
                         parme = {
                             appid: Global.appid,
                             code: self.code,
-                            introuid: 0,
+                            introuid: Global.Introuid,
                             appdata:"",
                         };
                     }
@@ -130,7 +166,45 @@ cc.Class({
                     // setTimeout(() => {
                     //     self.hideLoading()
                     // }, 700)
-                    cc.director.loadScene("start.fire");
+                    Global.GetUserInfo((res)=>{
+                        if(res.state == 1){
+                            Global.power = res.result.power;
+                            Global.level = res.result.lvl;
+
+                            Global.isgqlogin = res.result.isgqlogin;
+                            Global.ismpday = res.result.ismpday;
+                            Global.isteam = res.result.isteam;
+                            Global.isdaylogin = res.result.isdaylogin;
+                            Global.isshowad = res.result.isshowad;
+                            Global.isshowshare = res.result.isshowshare;
+                            Global.tips = res.result.tips;
+                            Global.ysid = res.result.ysid;
+                            Global.dayplaycount = res.result.dayplaycount;
+                            Global.userrank = res.result.userrank;
+
+                            Global.playerlvl = res.result.playerlvl;
+                            Global.carlvl = res.result.carlvl;
+                            
+                            if(Global.level === 1){
+                                Global.gamedata = {data:{"data":
+                                                        {"lvl":1,"conf":{"id":1,
+                                                        "word":["独","一","心","一","意","无","接","二","连","三"],
+                                                        "idiom":["独一无二","一心一意","接二连三"],
+                                                        "posx":[4,2,3,4,5,4,3,4,5,6],
+                                                        "posy":[5,4,4,4,4,3,2,2,2,2],
+                                                        "answer":[3,7,9],
+                                                        "barrier":[]}},
+                                                        "errcode":0,
+                                                        "errmsg":""
+                                                    },
+                                                };
+                                wx.aldSendEvent('新手引导页pv');
+                                cc.director.loadScene("game.fire");
+                            }else{
+                                cc.director.loadScene("start.fire");
+                            }
+                        }
+                    })
                 }
             })
         },

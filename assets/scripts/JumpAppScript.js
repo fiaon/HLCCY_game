@@ -35,42 +35,19 @@ cc.Class({
 
     TouchEnd(event) {
         event.stopPropagation();
-        wx.aldSendEvent('游戏推广');
         // 上线前注释console.log("this.index == ", this.index);
-        var curScene = cc.director.getScene().name;
-        if(curScene == "start"){
-            if(this.node.parent.name == "content"){
-                wx.aldSendEvent('游戏推广_游戏首页_收藏夹');
-            }else if(this.node.parent.parent.parent.name == "BoxView"){
-                wx.aldSendEvent('游戏推广_惊喜宝箱_滚动列表');
-            }else if(this.node.parent.parent.parent.name == "FreePowerView"){
-                wx.aldSendEvent('游戏推广_免费体力_滚动列表');
-            }else if(this.node.parent.parent.parent.name == "RankView"){
-                wx.aldSendEvent('游戏推广_荣耀榜_滚动列表');
-            }else if(this.node.parent.parent.parent.name == "PeopleUpView"){
-                wx.aldSendEvent('游戏推广_时光足迹_滚动列表');
-            }
-        }else{
-            if(this.node.parent.name == "content"){
-                wx.aldSendEvent('游戏推广_答题页_收藏夹');
-            }
-            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "LoserView"&&this.node.name == "jumplunboPrefab"){
-                wx.aldSendEvent('游戏推广_答题失败_滚动列表');
-            }
-            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "WinView"&&this.node.name == "jumplunboPrefab"){
-                wx.aldSendEvent('游戏推广_恭喜过关_滚动列表');
-            }
-            else if(this.node.parent.parent.parent&&this.node.parent.parent.parent.name == "GuideView"&&this.node.name == "jumplunboPrefab"){
-                wx.aldSendEvent('游戏推广_如何玩_滚动列表');
-            }
-            else if(this.node.name == "img_tuijian"){
-                wx.aldSendEvent('游戏推广_答题页_推荐游戏');
-            }
-            else if(this.node.name == "game_guanggao"){
-                wx.aldSendEvent('游戏推广_答题页_关卡广告');
-            }
-            
+        if(this.node.parent.name == "content"){
+            wx.aldSendEvent('导流广告_无聊点我');
+        }else if(this.node.parent.name == "lunbobg"){
+            wx.aldSendEvent('导流广告_循环广告');
+        }else if(this.node.parent.name == "huandong"){
+            wx.aldSendEvent('导流广告_晃动广告');
+        }else if(this.node.name == "game_guanggao"){
+            wx.aldSendEvent('导流广告_宫格广告');
+        }else if(this.node.name == "img_tuijian"){
+            wx.aldSendEvent('导流广告_如何玩广告');
         }
+        
         
         if (CC_WECHATGAME) {
             this.appId = Global.jumpappObject[this.index].apid;
@@ -88,7 +65,30 @@ cc.Class({
                 },
             });
         }
-    }
-
+    },
+    /**
+     * 放缩
+     */
+    JumpAppFangSuo: function () {
+        this.schedule(this.doSomething,1);
+    },
+    doSomething(){
+        var action = this.FangSuoFun();
+        this.node.runAction(action);
+    },
+    /**
+     * 按钮放缩方法
+     */
+    FangSuoFun: function () {
+        var action = cc.sequence(
+            cc.scaleTo(0.5, 0.9, 0.9),
+            cc.scaleTo(0.5, 1.1, 1.1),
+        );
+        return action;
+    },
+    //停止放缩
+    StopFangSuo(){
+        this.unschedule(this.doSomething);
+    },
     // update (dt) {},
 });

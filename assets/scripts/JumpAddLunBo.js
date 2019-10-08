@@ -13,8 +13,7 @@ cc.Class({
 
     properties: {
         jumplunbo_prefab:cc.Prefab,
-        jumplunbo_content:cc.Node,
-        jumplunbo_content_2:cc.Node,
+        content:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -22,73 +21,145 @@ cc.Class({
     // onLoad () {},
 
     start () {
-        this.gundong = false;
-        this.speed = 100;
-        //cc.director.getScene().name == "start"&&
+        this.firstclose = 0;
+        this.ischage = true;
+        this.jumpArr_1 = [0,1,2,3];
+        this.jumpArr_2 = [4,5,6,7];
         this.JumpCallBack();
-        
-        // this.schedule(function(){
-        //     if(this.jumplunbo_content.children.length > 0){
-        //         this.jumplunbo_content.children[0].setSiblingIndex(this.jumplunbo_content.children.length-1);
-        //     }
-        // },2);
-    },
-    //生成广告
-    JumpCallBack() {
-        if (Global.jumpappObject == null)
-            return;
-        let num_1 = Math.ceil(Global.jumpappObject.length/2);
-        let num_2 = Global.jumpappObject.length-num_1;
-        this.jumplunbo_content.width = num_1*100 + num_1*40;
-        this.jumplunbo_content_2.width = num_2 *100 + num_2*40;
-        if(this.jumplunbo_content.width>750){
 
-            this.outpos = this.jumplunbo_content.x = (this.jumplunbo_content.width-750)/2;
-            this.hidpos = this.jumplunbo_content_2.x = this.jumplunbo_content.x+this.jumplunbo_content.width;
+        this.schedule(this.QieHuanJumpApp,5);
+    },
+    //洗牌算法
+    shuffle(array) {
+        var m = array.length,
+          t, i;
+        // 如果还剩有元素…
+        while (m) {
+          // 随机选取一个元素…
+          i = Math.floor(Math.random() * m--);
+          // 与当前元素进行交换
+          t = array[m];
+          array[m] = array[i];
+          array[i] = t;
+        }
+        return array;
+    },
+    JumpCallBack() {
+        if (Global.jumpappObject == null){
+            return;
+        }
+        // let jumarr = [];
+        // this.jumpArr_1.sort(function(){ return 0.5 - Math.random() });
+        // jumarr = this.jumpArr_1;
+
+        let jumarr = [];
+        let temp_arr =[];
+        for(let i=0;i<Global.jumpappObject.length;i++){
+            temp_arr[i] = i;
+        }
+        jumarr = this.shuffle(temp_arr);
+
+        let randomAnim = Math.floor(Math.random() * 4);
+        for (let i = 0; i < 4; i++) {
+            let app = cc.instantiate(this.jumplunbo_prefab);
+            if (app) {
+                let src = app.getComponent(require("JumpAppScript"));
+                if (src) {
+                    src.index = jumarr[i];
+                }
+                src.sprite.spriteFrame = Global.jumpappObject[jumarr[i]].sprite;
+                if (src.labelGame) {
+                    src.labelGame.string = Global.jumpappObject[jumarr[i]].name;
+                }
+                if(i == randomAnim){
+                    app.getChildByName("dot").active = true;
+                    this.schedule(function () {
+                        app.runAction(cc.sequence(
+                            cc.scaleTo(0.5, 0.9, 0.9),
+                            cc.scaleTo(0.5, 1.1, 1.1),
+                        ));
+                    }, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
+                }
+                this.content.addChild(app);
+            }
+        }
+    },
+    CloseBtn(){
+        if(this.firstclose == 0){
+            let probability = Math.floor(Math.random() * 10);
+            let random = Math.floor(Math.random() * Global.jumpappObject.length);
+            if(probability<=5){
+                wx.aldSendEvent('关闭广告_是否成功_否');
+                this.firstclose++;
+                if (CC_WECHATGAME) {
+                    wx.navigateToMiniProgram({
+                        appId: Global.jumpappObject[random].apid,
+                        path: Global.jumpappObject[random].path,
+                        success: function (res) {
+                            // 上线前注释console.log(res);
+                        },
+                        fail: function (res) {
+                            // 上线前注释console.log(res);
+                        },
+                    });
+                }
+            }else{
+                wx.aldSendEvent('关闭广告_是否成功_是');
+                this.unschedule(this.QieHuanJumpApp);
+                this.node.destroy();
+            }
         }else{
-            this.outpos = this.jumplunbo_content.x = (750-this.jumplunbo_content.width)/2;
-            this.hidpos = this.jumplunbo_content_2.x = this.jumplunbo_content.x+this.jumplunbo_content.width;
-        }
-        for (let i = 0; i < num_1; i++) {
-            let app = cc.instantiate(this.jumplunbo_prefab);
-            if (app) {
-                this.jumplunbo_content.addChild(app);
-                let src = app.getComponent(require("JumpAppScript"));
-                if (src) {
-                    src.index = i;
-                }
-                src.sprite.spriteFrame = Global.jumpappObject[i].sprite;
-                if (src.labelGame) {
-                    src.labelGame.string = Global.jumpappObject[i].name;
-                }
-            }
-        }
-        for (let i = num_1; i < Global.jumpappObject.length; i++) {
-            let app = cc.instantiate(this.jumplunbo_prefab);
-            if (app) {
-                this.jumplunbo_content_2.addChild(app);
-                let src = app.getComponent(require("JumpAppScript"));
-                if (src) {
-                    src.index = i;
-                }
-                src.sprite.spriteFrame = Global.jumpappObject[i].sprite;
-                if (src.labelGame) {
-                    src.labelGame.string = Global.jumpappObject[i].name;
-                }
-            }
-        }
-        this.gundong = true;
-    },
-    //跑马灯动画
-    update (dt) {
-        if(this.gundong){
-            this.jumplunbo_content.x -= this.speed*dt;
-            this.jumplunbo_content_2.x -= this.speed*dt;
-            if(this.jumplunbo_content.x <=(-(this.jumplunbo_content.width-this.outpos))){
-                this.jumplunbo_content.x = this.hidpos;
-            }else if(this.jumplunbo_content_2.x <=(-(this.jumplunbo_content.width-this.outpos))){
-                this.jumplunbo_content_2.x  = this.hidpos;
-            }
+            wx.aldSendEvent('关闭广告_是否成功_是');
+            this.unschedule(this.QieHuanJumpApp);
+            this.node.destroy();
         }
     },
+    QieHuanJumpApp(){
+        if (Global.jumpappObject == null){
+            return;
+        }
+        this.content.removeAllChildren();
+        // let jumarr = [];
+        // if(this.ischage){
+        //     this.jumpArr_1.sort(function(){ return 0.5 - Math.random() });
+        //     jumarr = this.jumpArr_1;
+        // }else{
+        //     this.jumpArr_2.sort(function(){ return 0.5 - Math.random() });
+        //     jumarr = this.jumpArr_2;
+        // }
+        let jumarr = [];
+        let temp_arr =[];
+        for(let i=0;i<Global.jumpappObject.length;i++){
+            temp_arr[i] = i;
+        }
+        jumarr = this.shuffle(temp_arr);
+
+        let randomAnim = Math.floor(Math.random() * 4);
+        for (let i = 0; i < 4; i++) {
+            let app = cc.instantiate(this.jumplunbo_prefab);
+            if (app) {
+                let src = app.getComponent(require("JumpAppScript"));
+                if (src) {
+                    src.index = jumarr[i];
+                }
+                src.sprite.spriteFrame = Global.jumpappObject[jumarr[i]].sprite;
+                if (src.labelGame) {
+                    src.labelGame.string = Global.jumpappObject[jumarr[i]].name;
+                }
+                //动画
+                if(i == randomAnim){
+                    app.getChildByName("dot").active = true;
+                    this.schedule(function () {
+                        app.runAction(cc.sequence(
+                            cc.scaleTo(0.5, 0.9, 0.9),
+                            cc.scaleTo(0.5, 1.1, 1.1),
+                        ));
+                    }, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
+                }
+                this.content.addChild(app);
+            }
+        }
+        this.ischage = !this.ischage;
+    },
+    // update (dt) {},
 });

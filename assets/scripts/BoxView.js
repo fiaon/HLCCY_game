@@ -32,6 +32,9 @@ cc.Class({
     },
     videoBtn(){
         if (CC_WECHATGAME) {
+            if(Global.isplaymusic){
+                cc.audioEngine.play(Global.clip_btnclick, false);
+            }
             if(wx.createRewardedVideoAd){
                 wx.aldSendEvent('视频广告');
                 wx.aldSendEvent('视频广告_惊喜宝箱_立即领取');
@@ -53,21 +56,36 @@ cc.Class({
         Global.ShowTip(this.node, "观看完视频才会有奖励哦");
     },
     boxcloseBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         wx.aldSendEvent("惊喜宝箱_页面停留时间",{
             "耗时" : (Date.now()-this.startTime)/1000
         });
         wx.aldSendEvent('惊喜宝箱_关闭按钮');
-        this.node.destroy();
-    },
-    powerCloseBtn(){
-        //获取体力在关闭页面TODO
-        Global.AddPower(this.powernum,0,(res)=>{
-            
-        });
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
         cc.find("Canvas").getComponent("start").UserPower();
         this.node.destroy();
     },
+    powerCloseBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
+        //获取体力在关闭页面TODO
+        Global.AddPower(this.powernum,0,(res)=>{
+            cc.find("Canvas").getComponent("start").UserPower();
+        });
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
+        this.node.destroy();
+    },
     shareBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         wx.aldSendEvent('分享',{'页面' : '惊喜宝箱_炫耀一下'});
         Global.ShareApp();
     },

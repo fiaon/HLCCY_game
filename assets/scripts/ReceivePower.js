@@ -22,9 +22,21 @@ cc.Class({
     start () {
 
     },
+    shareBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
+        Global.ShareApp();
+    },
     CloseBtn(){
         Global.AddMpDayPower((res)=>{
             cc.find("Canvas").getComponent("start").UserPower();
+            if(Global.level>=10){
+                Global.showGameLoop = true;
+            }
+            if(Global.isplaymusic){
+                cc.audioEngine.play(Global.clip_btnclose, false);
+            }
             this.node.destroy();
         })
     },

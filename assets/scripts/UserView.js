@@ -19,6 +19,14 @@ cc.Class({
             default:[],
             type: cc.SpriteFrame,
         },
+        guanggao:{
+            default:[],
+            type:cc.Node,
+        },
+        clip_lvlup:{
+            default:null,
+            type:cc.AudioClip,
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -27,21 +35,44 @@ cc.Class({
 
     start () {
         this.ShareBtnFangSuo();
+
+        if(Global.isplaymusic){
+            cc.audioEngine.play(this.clip_lvlup, false);
+        }
+
         let self = this;
         Global.playerlvl++;
         self.player_img.spriteFrame = this.userlvlsprite[Global.playerlvl-1];
 
         this.title_label.string = "恭喜升级到"+Global.UserLvlData[Global.playerlvl-1].name.trim();
         Global.SetUserInfo();
+
+        for(let i =0;i<this.guanggao.length;i++){
+            let src = this.guanggao[i].getComponent(require("JumpAppScript"));
+            if (src) {
+                src.index = i;
+            }
+            src.sprite.spriteFrame = Global.jumpappObject[i].sprite;
+        }
     },
     init(){
 
     },
     closeBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclose, false);
+        }
         cc.find("Canvas").getComponent("start").UserPower();
         this.node.destroy();
+        if(Global.level>=10){
+            Global.showGameLoop = true;
+        }
+        cc.find("Canvas/user_1/lvup").getComponent(cc.Animation).play('lvlup');
     },
     shareBtn(){
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         wx.aldSendEvent('分享',{'页面' : '人物升级_炫耀一下'});
         Global.ShareApp();
     },

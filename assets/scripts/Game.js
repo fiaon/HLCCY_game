@@ -16,10 +16,6 @@ cc.Class({
             default: null,
             type: cc.Prefab,
         },
-        btn_tishi: {
-            default: null,
-            type: cc.Node,
-        },
         qipan: {
             default: null,
             type: cc.Node,
@@ -47,10 +43,10 @@ cc.Class({
             default:null,
             type:cc.Prefab,
         },
-        loserView:{
-            default:null,
-            type:cc.Prefab,
-        },
+        // loserView:{
+        //     default:null,
+        //     type:cc.Prefab,
+        // },
         game_jumpApp:{
             default:null,
             type:cc.Prefab,
@@ -72,14 +68,37 @@ cc.Class({
             default:null,
             type:cc.Node,
         },
+        lvlonce:cc.Node,
+        lvlonce_hand:cc.Node,
+        clip_idiom:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        clip_error:{
+            default:null,
+            type:cc.AudioClip,
+        },
+        tipsnum:cc.Node,
     },
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
+    // onLoad () {
+        
+    // },
+    Success(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '是'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '视频广告_答题页_提示_是'});
+        self.OneRightKey();
+    },
+    Failed(){
+        wx.aldSendEvent('视频广告',{'是否有效' : '否'});
+        wx.aldSendEvent('视频广告',{'是否有效' : '视频广告_答题页_提示_否'});
+        Global.ShowTip(this.node, "观看完视频才能获取提示");
+    },
     //打乱数组排序
     UpsetArray() {
-        if(Global.gamedata.lvl ==1){
+        if(Global.gamedata.data.data.lvl ==1){
             return;
         }
         var arr = this.oldArr;
@@ -100,54 +119,98 @@ cc.Class({
         this.map_temp = new Map();
         //保存答案的下标
         this.arr_answer = new Array();
-        // if(((Global.level)%3)==0){
-        //     this.ChaPingGuangGao();
-        // }
-    },
-    /**
-     * 插屏广告
-     */
-    ChaPingGuangGao(){
-        if(wx.createInterstitialAd){
-            let interstitialAd = wx.createInterstitialAd({ adUnitId: 'adunit-c7b07499a6b284d2' })
-            interstitialAd.onLoad(() => {
-                wx.aldSendEvent('插屏广告',{'监听' : '加载成功'});
-            })
-            if(interstitialAd){
-                interstitialAd.show().catch((err) => {
-                    console.error(err)
-                    if(err){
-                        wx.aldSendEvent('插屏广告',{'监听' : '加载失败'});
+
+        let self = this;
+        wx.onShow(function () {
+            if (self.isShared && self.shareTag == "keys") {
+                //分享后返回
+                let curTime = new Date().getTime();
+                if (curTime - self.closeTime >= 5000) {
+                    //分享成功
+                    wx.aldSendEvent('分享_答题页_提示_分享成功');
+                    self.OneRightKey();
+                    self.isShared = false;
+                    self.shareTag = "";
+                    self.closeTime = curTime;
+                }else{
+                    wx.aldSendEvent('分享_答题页_提示_分享失败');
+                    if(Global.level >=16){
+                        wx.aldSendEvent('视频广告');
+                        wx.aldSendEvent('视频广告_答题页_提示');
+                        Global.showAdVedio(self.Success.bind(self), self.Failed.bind(self));
                     }
-                })
+                }
             }
-            interstitialAd.onError((err) => {
-                wx.aldSendEvent('插屏广告',{'监听' : '加载失败'});
-            })
-            interstitialAd.onClose((res) => {
-                wx.aldSendEvent('插屏广告',{'监听' : '关闭'});
-            })
-          }
+        })
     },
-
+    LvLOne(){
+        this.lvlonce_hand.runAction(cc.sequence(
+            cc.moveTo(0.5, this.lvlonce_hand-20, this.lvlonce_hand.y),
+            cc.moveTo(0.5, this.lvlonce_hand.x, this.lvlonce_hand.y),
+        ));
+    },
+    onClickInviteFriend: function (event) {
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
+        wx.aldSendEvent('邀请',{'邀请类型' : '邀请好友组队'});
+        if (CC_WECHATGAME) {
+            // 上线前注释console.log(Global.shareimg);
+            wx.aldShareAppMessage({
+                title: '你忘记了我们当初的海誓山盟了吗？点击一起赢取千元红包大奖',
+                imageUrl: Global.shareimg,
+                query: "team=" + Global.Introuid,
+                success(res) {
+                    // 上线前注释console.log("yes");
+                },
+                fail(res) {
+                    // 上线前注释console.log("failed");
+                },
+                complete(res) {
+                    // 上线前注释console.log("complete");
+                }
+            });
+        }
+    },
     start() {
-        wx.aldSendEvent('答题页_页面访问数');
+        wx.aldSendEvent('答题页pv');
         Global.startTime = Date.now();
+        this.startTime = Date.now();
 
-        this.BtnTishiFangSuo();
-        //this.ChangeJumpAppSelectSprite();
-        //给子域发送消息
-        var openDataContext = wx.getOpenDataContext();
-        openDataContext.postMessage({
-            text:'game',
-        });
+
+        this.tipscount=0;
+        this.sharecount =0;
+        if(Global.tips>0){
+            this.tipsnum.active = true;
+            this.tipsnum.getChildByName("number").getComponent(cc.Label).string = Global.tips;
+        }else{
+            this.tipsnum.active = false;
+        }
+        //如果是第一关
+        if(Global.level ==1 || Global.gamedata.data.data.lvl ==1){
+            this.lvlonce.active = true;
+            this.schedule(this.LvLOne, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
+            this.node.getChildByName("backbg").active = false;
+        }
+        if(!Global.isteam){
+            this.node.getChildByName("haoyoubg").active = true;
+            this.display.node.active = false;
+        }else{
+            this.node.getChildByName("haoyoubg").active = false;
+            this.display.node.active = true;
+            //给子域发送消息
+            var openDataContext = wx.getOpenDataContext();
+            openDataContext.postMessage({
+                text:'game',
+            });
+        }
         this.tex = new cc.Texture2D();
 
         this.dataArr = null;       //消失的字数组的下标也是光标的位置
         this.oldArr = [];         //用来打乱的数组
         this.haveziArr = [];      //是否存在字(用来显示光标的位置)
         this.index = 0;
-        this.loser = null;
+        // this.loser = null;
         //获取当前关卡数据
         let data = Global.gamedata.data;
         console.log(data);
@@ -158,7 +221,7 @@ cc.Class({
         let _posy = data.data.conf.posy;
 
         let _answer = data.data.conf.answer;
-        this.level_label.string = "第"+Global.gamedata.lvl+"关";
+        this.level_label.string = "第"+data.data.lvl+"关";
 
         var _letters = new Map();
         for (let i = 0; i < _words.length; i++) {
@@ -205,7 +268,12 @@ cc.Class({
 
         //点击下面字的监听 放上去 word_key map中的
         cc.game.on("clickWord", function (id, word) {
-            this.loser =null;
+            if(Global.gamedata.data.data.lvl==1&&this.lvlonce.active){
+                this.lvlonce.active = false;
+                this.unschedule(this.LvLOne);
+                Global.ShowTip(this.node, "试着填充所有的成语吧");
+            }
+            // this.loser =null;
             let idiom_indexX=null;
             let idiom_indexY=null;
             let indexX = 0;
@@ -288,6 +356,9 @@ cc.Class({
         
         
                         if (bRight) {
+                            if(Global.isplaymusic){
+                                cc.audioEngine.play(this.clip_idiom, false);
+                            }
                             // console.log(`横向 %d,%d is right`, start_[e], end_[e]);
                             // for(let i = start_[e]; i <= end_[e]; i++){
                             //     let temp_word = i * 10 + y;
@@ -318,18 +389,21 @@ cc.Class({
                                 // console.log(`横向 %d,%d is not finished`, start_[e], end_[e]);
                             }
                             else{
-                                // console.log(`横向 %d,%d is wrong`, start_[e], end_[e]);
-                                if(this.loser ==null){
-                                    this.loser =  cc.instantiate(this.loserView);
-                                    this.node.addChild(this.loser);
+                                //console.log(`横向 %d,%d is wrong`, start_[e], end_[e]);
+                                if(Global.isplaymusic){
+                                    cc.audioEngine.play(this.clip_error, false);
                                 }
+                                // if(this.loser ==null){
+                                //     this.loser =  cc.instantiate(this.loserView);
+                                //     this.node.addChild(this.loser);
+                                // }
                                 for(let i = start_[e]; i <= end_[e]; i++){
                                     let temp_word = i * 10 + y;
                                     if (this.map_temp.has(temp_word)){
                                         if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
                                             //这里就是填错的字
-                                            this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
-                                            //cc.game.emit("idiomError",_letters.get(temp_word));
+                                            //this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
+                                            cc.game.emit("idiomError",_letters.get(temp_word));
                                         }
                                     }
                                 }
@@ -386,6 +460,9 @@ cc.Class({
         
         
                         if (bRight) {
+                            if(Global.isplaymusic){
+                                cc.audioEngine.play(this.clip_idiom, false);
+                            }
                             //console.log(`纵向 %d,%d is right`, start_[e], end_[e]);
                             // for(let i = start_[e]; i <= end_[e]; i++){
                             //     let temp_word = x * 10 + i;
@@ -417,16 +494,19 @@ cc.Class({
                             }
                             else{
                                 //console.log(`纵向 %d,%d is wrong`, start_[e], end_[e]);
-                                if(this.loser ==null){
-                                    this.loser =  cc.instantiate(this.loserView);
-                                    this.node.addChild(this.loser);
+                                if(Global.isplaymusic){
+                                    cc.audioEngine.play(this.clip_error, false);
                                 }
+                                // if(this.loser ==null){
+                                //     this.loser =  cc.instantiate(this.loserView);
+                                //     this.node.addChild(this.loser);
+                                // }
                                 for(let i = start_[e]; i <= end_[e]; i++){
                                     let temp_word = x * 10 + i;
                                     if (this.map_temp.has(temp_word)){
                                         if(_words[this.map_temp.get(temp_word)] != _words[this.map_answer.get(temp_word)]){
-                                            this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
-                                            //cc.game.emit("idiomError",_letters.get(temp_word));
+                                            //this.loser.getComponent("LoserView").AddErrorWord(_letters.get(temp_word));
+                                            cc.game.emit("idiomError",_letters.get(temp_word));
                                         }
                                     }
                                 }
@@ -564,8 +644,9 @@ cc.Class({
             }
             if(winnum == this.arr_answer.length){
                 //TODO
-                Global.level ++;
-                Global.SetUserInfo();
+                let nowtime = Math.floor((Date.now()-this.startTime)/1000);
+                Global.AddGameLog(nowtime,this.tipscount,this.sharecount,Global.gamedata.data.data.lvl);
+                Global.level = Global.gamedata.data.data.lvl;
                 let win =  cc.instantiate(this.winView);
                 this.node.addChild(win);
             }
@@ -594,28 +675,30 @@ cc.Class({
         }, this);
 
         if(CC_WECHATGAME){
-            let jumpIndexArr = new Array();
-            for(let i=0;i<9;i++){
-                for(let j=0;j<9;j++){
-                    let jumpadd = i*10+j;
-                    if(_index_letters.has(jumpadd) ==false){
-                        jumpIndexArr.push(jumpadd);
+            if(Global.level>10){
+                let jumpIndexArr = new Array();
+                for(let i=0;i<9;i++){
+                    for(let j=0;j<9;j++){
+                        let jumpadd = i*10+j;
+                        if(_index_letters.has(jumpadd) ==false){
+                            jumpIndexArr.push(jumpadd);
+                        }
                     }
                 }
-            }
-            let ranindex =Math.floor( Math.random()*jumpIndexArr.length);
-            let game_jump = cc.instantiate(this.game_jumpApp);
-            game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 75 +37;
-            game_jump.y = jumpIndexArr[ranindex]%10 * 75 +37;
-            let src = game_jump.getComponent(require("JumpAppScript"));
-            let src_index = Math.floor(Math.random()*Global.jumpappObject.length);
-            if(src){
-                if (src) {
-                    src.index = src_index;
+                let ranindex =Math.floor( Math.random()*jumpIndexArr.length);
+                let game_jump = cc.instantiate(this.game_jumpApp);
+                game_jump.x = parseInt(jumpIndexArr[ranindex]/10) * 75 +37;
+                game_jump.y = jumpIndexArr[ranindex]%10 * 75 +37;
+                let src = game_jump.getComponent(require("JumpAppScript"));
+                let src_index = Math.floor(Math.random()*Global.jumpappObject.length);
+                if(src){
+                    if (src) {
+                        src.index = src_index;
+                    }
+                    src.sprite.spriteFrame = Global.jumpappObject[src_index].sprite;
                 }
-                src.sprite.spriteFrame = Global.jumpappObject[src_index].sprite;
+                this.qipan.addChild(game_jump);
             }
-            this.qipan.addChild(game_jump);
 
             if(Global.level >=30){
                 this.tuijian.active = true;
@@ -711,12 +794,19 @@ cc.Class({
             }
         }
         cc.game.emit("clickWord",this.dataArr.answer[this.index],this.rightKeywords[this.dataArr.answer[this.index]]);
+        Global.ShowTip(this.node, "已成功获取一个提示");
     },
     BackBtn() {
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         cc.director.loadScene("start.fire");
     },
     //如何玩
     guideBtn() {
+        if(Global.isplaymusic){
+            cc.audioEngine.play(Global.clip_btnclick, false);
+        }
         wx.aldSendEvent("答题页_如何玩");
         let guide = cc.instantiate(this.guideview);
         if (guide) {
@@ -725,30 +815,25 @@ cc.Class({
     },
     //提示按钮(点击后进入好友分享页面，分享成功自动填充一个正确答案，分享失败进入15s视频播放页面，播放成功自动填充一个正确答案)
     shareBtn() {
-        wx.aldSendEvent('分享',{'页面' : '答题页_提示'});
-        Global.ShareApp();
-        this.OneRightKey();
-    },
-    /**
-     * 分享的放缩
-     */
-    BtnTishiFangSuo: function () {
-        var self = this;
-        this.schedule(function () {
-            var action = self.FangSuoFun();
-            self.btn_tishi.runAction(action);
-        }, 1.0, cc.macro.REPEAT_FOREVER, 0.1);
-    },
-
-    /**
-     * 按钮放缩方法
-     */
-    FangSuoFun: function () {
-        var action = cc.sequence(
-            cc.scaleTo(0.5, 0.9, 0.9),
-            cc.scaleTo(0.5, 1.1, 1.1),
-        );
-        return action;
+        wx.aldSendEvent("答题页_提示");
+        if(Global.tips >0){
+            Global.tips--;
+            this.tipscount++;
+            this.OneRightKey();
+            if(Global.tips>0){
+                this.tipsnum.active = true;
+                this.tipsnum.getChildByName("number").getComponent(cc.Label).string = Global.tips;
+            }else{
+                this.tipsnum.active = false;
+            }
+        }else{
+            this.sharecount++;
+            wx.aldSendEvent('分享',{'分享功能' : '答题页_提示'});
+            this.isShared = true;
+            this.shareTag = "keys";
+            this.closeTime = new Date().getTime();
+            Global.ShareApp();
+        }
     },
     _updaetSubDomainCanvas () {
         if (!this.tex) {
