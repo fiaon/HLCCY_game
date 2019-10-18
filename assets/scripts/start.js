@@ -225,7 +225,7 @@ cc.Class({
                             this.node.getChildByName("nationaldayBtn").active = true;
                         }
                         //显示获奖页面
-                        if(Global.isdaylogin){
+                        if(!Global.isdaylogin){
                             this.nationaldayBtn();
                         }
                     }
@@ -323,13 +323,16 @@ cc.Class({
                 
                 //首次邀请成功 没点击关闭广告按钮
                 if(Global.isshowad && !Global.isshowshare){
-                    //显示广告上面的差
-                    for(let i = 0; i < this.jumpAppPrefab.length; i++){
-                        this.jumpAppPrefab[i].getChildByName("btn_closegg").active = true;
-                    }
+                    // //显示广告上面的差
+                    // for(let i = 0; i < this.jumpAppPrefab.length; i++){
+                    //     this.jumpAppPrefab[i].getChildByName("btn_closegg").active = true;
+                    // }
                 }else if(Global.isshowad){
                     //首次邀请成功 点击关闭广告按钮
                     self.shareSprite.spriteFrame = self.sharespriteFrame;
+                    for(let i = 0; i < this.jumpAppPrefab.length; i++){
+                        this.jumpAppPrefab[i].getChildByName("btn_closegg").active = true;
+                    }
                 }
 
                 
@@ -716,14 +719,14 @@ cc.Class({
                     }
                 }else{
                     wx.aldSendEvent('关闭广告_是否成功_是');
-                    Global.isshowshare = true;
-                    Global.SetUserInfo();
+                    //Global.isshowshare = true;
+                    //Global.SetUserInfo();
                     event.target.active = false;
                 }
             }else{
                 wx.aldSendEvent('关闭广告_是否成功_是');
-                Global.isshowshare = true;
-                Global.SetUserInfo();
+                //Global.isshowshare = true;
+                //Global.SetUserInfo();
                 event.target.active = false;
             }
         }else{

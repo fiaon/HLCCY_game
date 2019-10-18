@@ -28,6 +28,12 @@ cc.Class({
         this.JumpCallBack();
 
         this.schedule(this.QieHuanJumpApp,5);
+        //如果邀请过好友
+        if(Global.isshowad){
+            this.node.getChildByName("btn_closegg").active = true;
+        }else{
+            this.node.getChildByName("btn_closegg").active = false;
+        }
     },
     //洗牌算法
     shuffle(array) {

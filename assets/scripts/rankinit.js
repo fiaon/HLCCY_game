@@ -42,6 +42,7 @@ cc.Class({
             this.level.string = data.rank;
         }
         if(data.users.length == 2){
+            this.duiyou.active = true;
             let avatarUrl = data.users[0].headurl;
             this.createImage(avatarUrl);
             
